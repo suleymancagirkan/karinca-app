@@ -48,7 +48,7 @@ export default function ReleaseNotes() {
                         </h3>
 
                         <p className="text-sm text-black/65 line-clamp-2">
-                            We've introduced dark mode across the platform. Enjoy a better night-time experience!
+                            We&apos;ve introduced dark mode across the platform. Enjoy a better night-time experience!
                         </p>
 
                         <div className="flex items-center justify-between mt-3 text-xs text-black/50">
