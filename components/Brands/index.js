@@ -26,7 +26,7 @@ export default function Brands({ isDark = false }) {
                 }}
             >
                 {[...items, ...items].map((i, k) => (
-                    <img key={k} src={i} className={`w-48 ${isDark ? 'brightness-1000000' : 'brightness-0'}`} />
+                    <img key={k} src={i} className={`w-48 dark:brightness-1000000 brightness-0`} />
                 ))}
             </motion.div>
         </div>
