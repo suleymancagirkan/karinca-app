@@ -21,7 +21,6 @@ export default function Maintenance() {
 
     return (
         <div className={`${polysans.className} min-h-screen bg-black flex flex-col items-center justify-center p-8 relative overflow-hidden`}>
-            {/* Background Blobs */}
             <div className="absolute inset-0">
                 <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
                 <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
@@ -52,15 +51,15 @@ export default function Maintenance() {
                     className="mb-12"
                 >
                     <h1 className="text-6xl md:text-7xl font-black text-neutral-900 dark:text-white mb-6 tracking-tight">
-                        We're <span className="text-blue-500">upgrading</span>
+                        We are <span className="text-blue-500">upgrading</span>
                     </h1>
                     <p className={`${tasaOrbiter.className} text-xl text-neutral-600 dark:text-neutral-400 mb-8 max-w-2xl mx-auto leading-relaxed`}>
-                        We're working hard to bring you something amazing. Our platform is temporarily under maintenance while we implement exciting new features.
+                        We are working hard to bring you something amazing. Our platform is temporarily under maintenance while we implement exciting new features.
                     </p>
                 </motion.div>
 
 
-                {/* What's Coming */}
+                {/* What is Coming */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -70,7 +69,7 @@ export default function Maintenance() {
                     <div className="flex items-center justify-center gap-x-2 mb-8">
                         <TbRocket className="text-2xl text-blue-500" />
                         <span className={`${tasaOrbiter.className} text-2xl font-bold text-white`}>
-                            What's Coming
+                            What is Coming
                         </span>
                     </div>
                     
