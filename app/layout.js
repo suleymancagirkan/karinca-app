@@ -1,9 +1,5 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "@/public/globals.css";
-import { polysans } from "./fonts/polysans";
 import CustomLayout from "@/components/CustomLayout";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Karınca",
@@ -13,9 +9,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <CustomLayout>
-      <Header />
       {children}
-      <Footer />
     </CustomLayout>
   );
 }
