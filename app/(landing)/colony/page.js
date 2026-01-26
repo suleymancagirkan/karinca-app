@@ -85,10 +85,6 @@ export default function ColonyPage() {
         const animate = () => {
             ctx.clearRect(0, 0, width, height);
 
-            // Draw Target "Pheromone" (Mouse Trail)
-            // We use the React state 'mousePos' via a ref potentially, but here we can just assume the update logic has passed coordinates.
-            // Actually, best to track mouse inside the effect for perf.
-
             ants.forEach(ant => {
                 ant.update(mouse.x, mouse.y);
                 ant.draw();
