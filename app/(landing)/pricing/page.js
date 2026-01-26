@@ -28,8 +28,6 @@ export default function Pricing() {
     const sectorTabs = [
         { id: 'Corporate', label: 'Corporate', icon: <TbBuilding /> },
         { id: 'Ecommerce', label: 'E-commerce', icon: <TbShoppingCart /> },
-        { id: 'Gaming', label: 'Gaming', icon: <TbDeviceGamepad2 /> },
-        { id: 'SaaS', label: 'SaaS', icon: <TbCloudComputing /> },
     ];
 
     const pricingData = {
@@ -284,8 +282,8 @@ export default function Pricing() {
                                     key={tab.id}
                                     onClick={() => setSelectedSector(tab.id)}
                                     className={`relative px-4 py-2 rounded-full font-unbounded text-xs font-bold transition-all flex items-center gap-2 ${selectedSector === tab.id
-                                            ? 'text-white'
-                                            : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                                        ? 'text-white'
+                                        : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                                         }`}
                                 >
                                     {selectedSector === tab.id && (
@@ -310,8 +308,8 @@ export default function Pricing() {
                                     key={tab.id}
                                     onClick={() => setMethod(tab.id)}
                                     className={`relative px-6 py-2 rounded-full font-unbounded text-xs font-bold transition-all ${method === tab.id
-                                            ? 'text-white'
-                                            : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
+                                        ? 'text-white'
+                                        : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                                         }`}
                                 >
                                     {method === tab.id && (

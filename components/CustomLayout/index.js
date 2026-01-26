@@ -6,6 +6,8 @@ import React from 'react';
 import Header from '../Header';
 import Footer from '../Footer';
 import { Syne, Unbounded } from 'next/font/google';
+import { Toaster } from 'react-hot-toast';
+import { SessionProvider } from 'next-auth/react';
 
 const unbounded = Unbounded({
     subsets: ['latin'],
@@ -40,13 +42,16 @@ export default function CustomLayout({ children }) {
     } else {
         return (
             <html lang="tr" suppressHydrationWarning>
-                <body className={`${unbounded.className} font-sans antialiased`}>
-                    <ThemeProvider defaultTheme='system' enableSystem={true}>
-                        <Header />
-                        {children}
-                        <Footer />
-                    </ThemeProvider>
-                </body>
+                <SessionProvider>
+                    <body className={`${unbounded.className} font-sans antialiased`}>
+                        <ThemeProvider defaultTheme='system' enableSystem={true}>
+                            <Toaster />
+                            <Header />
+                            {children}
+                            <Footer />
+                        </ThemeProvider>
+                    </body>
+                </SessionProvider>
             </html>
         );
     }

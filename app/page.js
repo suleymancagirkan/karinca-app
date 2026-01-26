@@ -5,6 +5,7 @@ import Statistics from '@/components/Statistics';
 import Process from '@/components/Process';
 import FAQ from '@/components/FAQ';
 import CTA from '@/components/CTA';
+import { useSession } from 'next-auth/react';
 
 export default function Home() {
   return (

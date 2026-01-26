@@ -33,8 +33,10 @@ import {
     TbX,
     TbCreditCardFilled,
     TbTicket,
-    TbChevronDown
+    TbChevronDown,
+    TbQuestionMark
 } from "react-icons/tb";
+import { signOut, useSession } from 'next-auth/react';
 
 export default function Header() {
     const [dropdown, setDropdown] = useState(null);
@@ -43,6 +45,7 @@ export default function Header() {
     const [mounted, setMounted] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [hoveredNav, setHoveredNav] = useState(null);
+    const { data: session, status } = useSession()
 
     useEffect(() => {
         setMounted(true);
@@ -74,6 +77,7 @@ export default function Header() {
         { name: 'Billing', route: '/profile/billing', icon: <TbCreditCardFilled className="text-lg" /> },
         { name: 'Support', route: '/profile/support', icon: <TbTicket className="text-lg" /> },
     ];
+
 
     return (
         <>
@@ -197,44 +201,52 @@ export default function Header() {
                             )}
                         </div>
 
-                        <div className="relative" onMouseEnter={() => setDropdown('profile')} onMouseLeave={() => setDropdown(null)}>
-                            <button className="flex items-center gap-2 pl-1 pr-3 py-1 bg-neutral-100 dark:bg-white/5 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 rounded-full transition-all duration-200">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                    C
+                        {session ? (
+                            <div className="relative" onMouseEnter={() => setDropdown('profile')} onMouseLeave={() => setDropdown(null)}>
+                                <button className="flex items-center gap-2 pl-1 pr-3 py-1 bg-neutral-100 dark:bg-white/5 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 rounded-full transition-all duration-200">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                        C
+                                    </div>
+                                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{session?.user?.username}</span>
+                                </button>
+
+                                <AnimatePresence>
+                                    {dropdown === 'profile' && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            className="absolute top-full right-0 mt-2 w-56 z-50"
+                                        >
+                                            <div className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-neutral-200 dark:border-neutral-800">
+                                                {profileItems.map((item, idx) => (
+                                                    <Link
+                                                        key={idx}
+                                                        href={item.route}
+                                                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-sm text-neutral-600 dark:text-neutral-300"
+                                                    >
+                                                        {item.icon}
+                                                        {item.name}
+                                                    </Link>
+                                                ))}
+                                                <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-1" />
+                                                <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors text-sm">
+                                                    <TbDoorExit className="text-lg" />
+                                                    Sign out
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        ) : (
+                            <Link href="/login" className="flex items-center gap-2 pl-1 pr-3 py-1 bg-neutral-100 dark:bg-white/5 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 rounded-full transition-all duration-200">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-500 to-neutral-600 flex items-center justify-center text-white text-base font-bold shrink-0">
+                                    <TbQuestionMark />
                                 </div>
-                                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">cgrkn</span>
-                            </button>
-
-                            <AnimatePresence>
-                                {dropdown === 'profile' && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute top-full right-0 mt-2 w-56 z-50"
-                                    >
-                                        <div className="bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-neutral-200 dark:border-neutral-800">
-                                            {profileItems.map((item, idx) => (
-                                                <Link
-                                                    key={idx}
-                                                    href={item.route}
-                                                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-sm text-neutral-600 dark:text-neutral-300"
-                                                >
-                                                    {item.icon}
-                                                    {item.name}
-                                                </Link>
-                                            ))}
-                                            <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-1" />
-                                            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors text-sm">
-                                                <TbDoorExit className="text-lg" />
-                                                Sign out
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-
+                                <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">Login</span>
+                            </Link>
+                        )}
                         <button
                             className="lg:hidden p-2 text-2xl text-neutral-800 dark:text-neutral-200"
                             onClick={() => setMobileMenu(true)}
