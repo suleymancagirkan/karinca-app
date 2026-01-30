@@ -1,6 +1,13 @@
 import "@/public/globals.css";
 import CustomLayout from "@/components/CustomLayout";
-import Footer from "@/components/Footer";
+import { Unbounded } from 'next/font/google';
+
+const unbounded = Unbounded({
+  subsets: ['latin'],
+  variable: '--font-unbounded',
+  weight: ['400', '500', '600', '700', '800', '900'],
+  display: 'swap',
+});
 
 export const metadata = {
   title: "Karınca",
@@ -9,10 +16,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <div suppressContentEditableWarning suppressHydrationWarning>
-      <CustomLayout>
-        {children}
-      </CustomLayout>
-    </div>
+    <html lang="tr" suppressHydrationWarning className={unbounded.variable}>
+      <body className={`${unbounded.className} antialiased`} suppressContentEditableWarning suppressHydrationWarning>
+        <CustomLayout>
+          {children}
+        </CustomLayout>
+      </body>
+    </html>
   );
 }

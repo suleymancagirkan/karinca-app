@@ -4,11 +4,14 @@ import Image from 'next/image';
 import React, { useState } from 'react';
 
 import logo from "@/public/logo.svg";
-import { TbBallpenFilled, TbChevronDown, TbChevronRight, TbDashboardFilled, TbLayoutSidebarLeftExpand, TbLifebuoyFilled, TbMoonFilled, TbRadarFilled, TbSettingsFilled, TbShoppingCartFilled, TbSunFilled, TbUserFilled } from 'react-icons/tb';
+import { TbBallpenFilled, TbChevronDown, TbChevronRight, TbDashboardFilled, TbHomeFilled, TbLayoutSidebarLeftExpand, TbLifebuoyFilled, TbMoonFilled, TbRadarFilled, TbSettingsFilled, TbShoppingCartFilled, TbSunFilled, TbUserFilled } from 'react-icons/tb';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { UserBadge } from '@/lib/functions';
 
-export default function DashboardSidebar({ isOpen = false, onClose = () => {} }) {
-    const [selectedItem, setSelectedItem] = useState('')
+export default function DashboardSidebar({ isOpen = false, onClose = () => { } }) {
+    const [selectedItem, setSelectedItem] = useState('');
+    const { data: session } = useSession();
 
     const items = [
         {
@@ -21,7 +24,6 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => {} })
             icon: <TbUserFilled className='text-xl ml-2' />,
             subItems: [
                 { name: 'Manage Users', route: '/dashboard/users' },
-                { name: 'Roles', route: '/dashboard/users/roles' },
             ]
         },
         {
@@ -62,7 +64,7 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => {} })
             subItems: [
                 { name: 'General', route: '/dashboard/setting/general' },
                 { name: 'System', route: '/dashboard/settings/system' },
-                { name: 'SEO', route: '/dashboard/settings/general' },
+                { name: 'SEO', route: '/dashboard/settings/seo' },
                 { name: 'Languages', route: '/dashboard/settings/languages' },
             ]
         },
@@ -77,56 +79,70 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => {} })
                 fixed inset-y-0 left-0 z-40 lg:z-auto lg:static
                 transform transition-transform duration-300
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0
-                w-64 bg-white h-screen dark:bg-black p-2 px-3 shadow-lg ring-1 ring-neutral-200 dark:ring-neutral-800 backdrop-blur-sm flex flex-col
+                w-64 bg-white h-full dark:bg-black p-4 shadow-lg ring-1 ring-neutral-200 dark:ring-neutral-800 lg:ring-0 backdrop-blur-sm flex flex-col lg:rounded-[2rem] lg:bg-transparent lg:dark:bg-transparent lg:shadow-none
             `}>
-                <div className='flex flex-row items-center justify-between w-full'>
-                    <div className='flex flex-row items-center justify-start gap-x-2'>
-                        <Image width={25} height={30} alt='logo' src={logo} priority className='dark:invert-100 invert-0' />
-                        <span className='text-base text-white tracking-tight font-medium'>Karinca</span>
+                {/* HEADER */}
+                <div className='flex flex-row items-center justify-between w-full mb-6 px-2 shrink-0'>
+                    <div className='flex flex-row items-center justify-start gap-x-3'>
+                        <Image width={28} height={28} alt='logo' src={logo} priority className='dark:invert invert-0' />
+                        <span className='text-lg text-black dark:text-white tracking-tight font-bold font-unbounded'>Karinca</span>
                     </div>
-                    <button className='text-xl text-black dark:text-white p-1.5 rounded-xl ring-1 ring-transparent hover:ring-neutral-700 hover:bg-neutral-800'>
-                        <TbMoonFilled />
-                    </button>
+                    <Link href="/" className='text-lg text-black dark:text-white p-2 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors'>
+                        <TbHomeFilled />
+                    </Link>
                 </div>
-                <div className='flex flex-col items-start justify-between gap-y-2 px-1 mt-3 flex-1'>
-                    <div className='flex-1 w-full'>
-                        {items.map((item, index) => (
-                            item.route ? (
-                                <Link key={index} href={item.route} className='flex flex-row mt-2 items-center justify-start gap-x-2 w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 py-2 rounded-lg transition'>
-                                    {item.icon}
-                                    <span className='text-sm'>{item.name}</span>
-                                </Link>
+
+                {/* SCROLLABLE MENU AREA (Takes all remaining space) */}
+                <div className='flex-1 w-full overflow-y-auto overflow-x-hidden space-y-1'>
+                    {items.map((item, index) => (
+                        item.route ? (
+                            <Link key={index} href={item.route} className='flex flex-row mt-2 items-center justify-start gap-x-2 w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 py-2 rounded-lg transition'>
+                                {item.icon}
+                                <span className='text-sm'>{item.name}</span>
+                            </Link>
+                        ) : (
+                            <div key={index} className='flex flex-col items-start mt-2 justify-start w-full'>
+                                <button onClick={() => setSelectedItem(selectedItem === item.name ? null : item.name)} className='flex flex-row items-center justify-between w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 py-2 rounded-lg transition'>
+                                    <div className='flex flex-row items-center justify-start gap-x-2'>
+                                        {item.icon}
+                                        <span className='text-sm'>{item.name}</span>
+                                    </div>
+                                    {selectedItem === item.name ? <TbChevronDown className='text-xl mr-2' /> : <TbChevronRight className='text-xl mr-2' />}
+                                </button>
+                                {selectedItem === item.name && (
+                                    <div className='flex flex-col items-start justify-start w-full border-l border-neutral-800 ml-4'>
+                                        {item.subItems?.map((it, ind) => (
+                                            <Link key={ind} href={it.route} className='flex flex-row border-l border-neutral-800 hover:border-neutral-600 items-center justify-start gap-x-2 pl-4 w-full text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white py-2 transition'>
+                                                <span className='text-xs'>{it.name}</span>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )
+                    ))}
+                </div>
+
+                {/* PROFILE SECTION (Pinned to bottom) */}
+                <div className='mt-4 w-full pt-4 border-t border-neutral-100 dark:border-neutral-800 shrink-0'>
+                    <button className='flex flex-row items-center justify-start gap-x-3 w-full text-black/80 dark:text-white/80 hover:bg-neutral-100 dark:hover:bg-neutral-800 p-2.5 rounded-xl transition-all group'>
+                        <div className="relative">
+                            {session?.user?.image ? (
+                                <img src={session.user.image} className='w-10 h-10 rounded-full group-hover:scale-105 transition-transform object-cover' alt="User Avatar" />
                             ) : (
-                                <div key={index} className='flex flex-col items-start mt-2 justify-start w-full'>
-                                    <button onClick={() => setSelectedItem(selectedItem === item.name ? null : item.name)} className='flex flex-row items-center justify-between w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 py-2 rounded-lg transition'>
-                                        <div className='flex flex-row items-center justify-start gap-x-2'>
-                                            {item.icon}
-                                            <span className='text-sm'>{item.name}</span>
-                                        </div>
-                                        {selectedItem === item.name ? <TbChevronDown className='text-xl mr-2' /> : <TbChevronRight className='text-xl mr-2' />}
-                                    </button>
-                                    {selectedItem === item.name && (
-                                        <div className='flex flex-col items-start justify-start w-full border-l border-neutral-800 ml-4'>
-                                            {item.subItems?.map((it, ind) => (
-                                                <Link key={ind} href={it.route} className='flex flex-row border-l border-neutral-800 hover:border-neutral-600 items-center justify-start gap-x-2 pl-4 w-full text-black/80 dark:text-white/80 hover:text-black dark:hover:text-white py-2 transition'>
-                                                    <span className='text-xs'>{it.name}</span>
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            )
-                        ))}
-                    </div>
-                    <button className='flex flex-row items-center justify-start gap-x-2 w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 p-2 rounded-lg transition'>
-                        <img src="https://minotar.net/avatar/cgrkn" className='w-9 rounded-xl' />
-                        <div className='flex flex-col items-start justify-start gap-y-1'>
-                            <span className='text-sm text-white'>cgrkn</span>
-                            <span className='px-2 rounded-md dark:bg-red-500/25 dark:text-red-500 tracking-tight text-xs'>Admin</span>
+                                <img src="https://minotar.net/avatar/suleymannn" className='w-10 h-10 rounded-xl group-hover:scale-105 transition-transform' alt="Default Avatar" />
+                            )}
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-black"></div>
+                        </div>
+                        <div className='flex flex-col items-start justify-start gap-y-0.5'>
+                            <span className='text-sm font-bold font-unbounded text-black dark:text-white truncate max-w-[120px]'>
+                                {session?.user?.username || 'Guest User'}
+                            </span>
+                            <UserBadge role={session?.user?.role} />
                         </div>
                     </button>
                 </div>
             </div>
         </>
     );
-};
+}

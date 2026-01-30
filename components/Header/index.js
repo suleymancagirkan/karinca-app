@@ -34,7 +34,8 @@ import {
     TbCreditCardFilled,
     TbTicket,
     TbChevronDown,
-    TbQuestionMark
+    TbQuestionMark,
+    TbDashboard
 } from "react-icons/tb";
 import { signOut, useSession } from 'next-auth/react';
 
@@ -72,7 +73,7 @@ export default function Header() {
     ];
 
     const profileItems = [
-        { name: 'Dashboard', route: '/profile', icon: <TbUserFilled className="text-lg" /> },
+        { name: 'Profile', route: '/profile', icon: <TbUserFilled className="text-lg" /> },
         { name: 'Settings', route: '/profile/settings', icon: <TbSettingsFilled className="text-lg" /> },
         { name: 'Billing', route: '/profile/billing', icon: <TbCreditCardFilled className="text-lg" /> },
         { name: 'Support', route: '/profile/support', icon: <TbTicket className="text-lg" /> },
@@ -205,7 +206,7 @@ export default function Header() {
                             <div className="relative" onMouseEnter={() => setDropdown('profile')} onMouseLeave={() => setDropdown(null)}>
                                 <button className="flex items-center gap-2 pl-1 pr-3 py-1 bg-neutral-100 dark:bg-white/5 border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 rounded-full transition-all duration-200">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                        C
+                                        {session?.user?.name.split(" ")[0][0] + session?.user?.name.split(" ")[1][0]}
                                     </div>
                                     <span className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{session?.user?.username}</span>
                                 </button>
@@ -230,7 +231,13 @@ export default function Header() {
                                                     </Link>
                                                 ))}
                                                 <div className="h-px bg-neutral-200 dark:bg-neutral-800 my-1" />
-                                                <button onClick={() => signOut()} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors text-sm">
+                                                {session?.user?.role === 'admin' && (
+                                                    <Link href="/dashboard" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/10 text-blue-600 dark:text-blue-400 transition-colors text-sm">
+                                                        <TbDashboard className="text-lg" />
+                                                        Dashboard
+                                                    </Link>
+                                                )}
+                                                <button onClick={() => signOut({ callbackUrl: '/' })} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 text-red-600 dark:text-red-400 transition-colors text-sm">
                                                     <TbDoorExit className="text-lg" />
                                                     Sign out
                                                 </button>
@@ -322,12 +329,14 @@ export default function Header() {
                                 ))}
                             </div>
 
-                            <div className="p-6 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
-                                <Link href="/dashboard" className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-medium hover:opacity-90 transition-opacity">
-                                    <TbDashboardFilled />
-                                    Go to Dashboard
-                                </Link>
-                            </div>
+                            {session?.user?.role === 'admin' && (
+                                <div className="p-6 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+                                    <Link href="/dashboard" className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-medium hover:opacity-90 transition-opacity">
+                                        <TbDashboardFilled />
+                                        Go to Dashboard
+                                    </Link>
+                                </div>
+                            )}
                         </motion.div>
                     </>
                 )}

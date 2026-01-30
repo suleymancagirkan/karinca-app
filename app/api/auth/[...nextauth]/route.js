@@ -53,12 +53,22 @@ export const authOptions = {
         strategy: "jwt",
     },
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
+            // Initial sign in
             if (user) {
                 token.id = user.id;
                 token.username = user.username;
                 token.name = user.fullname;
+                token.role = user.role;
+                token.createdAt = user.createdAt;
+                token.bio = user.bio;
             }
+
+            if (trigger === "update" && session?.user) {
+                token.name = session.user.name;
+                token.bio = session.user.bio;
+            }
+
             return token;
         },
         async session({ session, token }) {
@@ -66,6 +76,9 @@ export const authOptions = {
                 session.user.id = token.id;
                 session.user.username = token.username;
                 session.user.name = token.name;
+                session.user.role = token.role;
+                session.user.createdAt = token.createdAt;
+                session.user.bio = token.bio;
             }
             return session;
         }

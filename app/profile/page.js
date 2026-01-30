@@ -16,15 +16,29 @@ import {
     TbClock,
     TbArrowUpRight
 } from 'react-icons/tb';
+import { useSession } from 'next-auth/react';
 
 export default function Profile() {
+    const { data: session } = useSession();
+
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+
+        const date = new Date(dateString);
+
+        return new Intl.DateTimeFormat('en-GB', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+        }).format(date);
+    };
 
     // Mock Data
     const stats = [
         { label: 'Status', value: 'Active', icon: <TbShieldCheck />, color: 'text-green-500' },
         { label: 'Plan', value: 'Standard', icon: <TbRocket />, color: 'text-blue-500' },
         { label: 'Uptime', value: '99.9%', icon: <TbActivity />, color: 'text-purple-500' },
-        { label: 'Last Login', value: '2m ago', icon: <TbClock />, color: 'text-orange-500' },
+        { label: 'Last Login', value: formatDate(session?.user?.createdAt), icon: <TbClock />, color: 'text-orange-500' },
     ];
 
     const activities = [
@@ -57,7 +71,7 @@ export default function Profile() {
                         Overview
                     </span>
                     <h1 className="font-unbounded font-black text-4xl md:text-5xl text-neutral-900 dark:text-white mb-4">
-                        WELCOME BACK, <br /> <span className="text-blue-600">JOHN</span>
+                        WELCOME BACK, <br /> <span className="text-blue-600">{session?.user?.name.split(" ")[0]}</span>
                     </h1>
                     <p className="font-unbounded text-sm text-neutral-500 max-w-lg">
                         Here's what's happening with your account today.
