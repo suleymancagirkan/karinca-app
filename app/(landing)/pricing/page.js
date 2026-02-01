@@ -7,14 +7,14 @@
  * Preserves all original functionality while upgrading the UI.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { TbCheck, TbX, TbArrowUpRight, TbBuilding, TbShoppingCart, TbDeviceGamepad2, TbCloudComputing } from 'react-icons/tb';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import PurchaseModal from '@/components/Purchase/PurchaseModal';
 import ThemeSelectionModal from '@/components/Purchase/ThemeSelectionModal';
 
-export default function Pricing() {
+function PricingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [method, setMethod] = useState('Monthly');
@@ -373,3 +373,11 @@ export default function Pricing() {
         </main>
     );
 };
+
+export default function Pricing() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#050505] text-neutral-500 font-unbounded">Loading...</div>}>
+            <PricingContent />
+        </Suspense>
+    );
+}
