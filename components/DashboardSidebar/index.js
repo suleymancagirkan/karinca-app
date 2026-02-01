@@ -51,8 +51,8 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => { } }
             icon: <TbBallpenFilled className='text-xl ml-2' />,
             subItems: [
                 { name: 'Posts', route: '/dashboard/blogs/posts' },
-                { name: 'Categories', route: '/dashboard/support/categories' },
-                { name: 'Comments', route: '/dashboard/support/comments' },
+                { name: 'Categories', route: '/dashboard/blogs/categories' },
+                { name: 'Comments', route: '/dashboard/blogs/comments' },
             ]
         },
         {

@@ -15,9 +15,9 @@ export default function Maintenance() {
     const tasks = [
         { task: "Payment System Integration", status: "completed" },
         { task: "Skeleton Designing", status: "completed" },
-        { task: "Blog System Integration", status: "in-progress" },
-        { task: "Support System Integration", status: "pending" },
-        { task: "We dont have any ideas", status: "pending" }
+        { task: "Blog System Integration", status: "completed" },
+        { task: "Support System Integration", status: "in-progress" },
+        { task: "SEO Optimization", status: "pending" }
     ];
 
     return (

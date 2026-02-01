@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function proxy(request) {
-    const maintenanceMode = true;
+    const maintenanceMode = false;
     const { pathname } = request.nextUrl;
 
     // 1. Oturumu (Token) Manuel Olarak Çekiyoruz

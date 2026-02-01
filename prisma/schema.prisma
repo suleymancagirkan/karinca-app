@@ -20,6 +20,8 @@ model User {
   bio           String?
   orders        Order[]
   subscriptions Subscription[]
+  blogs         Blog[]
+  comments      Comment[]
 }
 
 model Category {
@@ -107,4 +109,38 @@ model Subscription {
   user       User     @relation(fields: [userId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
   theme      Theme    @relation(fields: [themeId], references: [id])
+}
+
+model Blog {
+  id            String         @id @default(cuid())
+  title         String
+  content       String
+  image         String?
+  slug          String         @unique
+  authorId      String
+  categoryId    String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  author        User           @relation(fields: [authorId], references: [id])
+  category      BlogCategory   @relation(fields: [categoryId], references: [id])
+  comments      Comment[]
+}
+
+model BlogCategory {
+  id            String   @id @default(cuid())
+  name          String
+  createdAt     DateTime @default(now())
+  blogs         Blog[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  blogId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

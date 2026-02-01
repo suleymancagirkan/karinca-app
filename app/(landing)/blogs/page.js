@@ -1,255 +1,192 @@
+
 'use client';
 
-/**
- * @page Blogs
- * @description A modern, grid-based blog listing page.
- * Features a high-impact featured post, category filtering, and a clean masonry-style layout.
- * consistent with the "Unbounded" design language.
- */
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { TbArrowUpRight, TbCalendar, TbClock, TbSearch, TbFilter } from 'react-icons/tb';
+import { TbCalendar, TbArrowRight, TbSearch, TbCategory } from 'react-icons/tb';
 
-// Mock Data
-const categories = ["All", "Design", "Development", "Business", "Tutorials"];
+export default function BlogsPage() {
+    const [blogs, setBlogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [search, setSearch] = useState('');
 
-const blogPosts = [
-    {
-        id: 1,
-        title: "The Future of Digital Interfaces",
-        excerpt: "How spatial computing and AI are reshaping the way we interact with technology.",
-        category: "Design",
-        date: "Oct 24, 2025",
-        readTime: "5 min read",
-        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
-        featured: true,
-        slug: "future-of-digital-interfaces"
-    },
-    {
-        id: 2,
-        title: "Mastering Next.js 15",
-        excerpt: "A deep dive into the latest features, server actions, and performance optimizations.",
-        category: "Development",
-        date: "Oct 20, 2025",
-        readTime: "8 min read",
-        image: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2670&auto=format&fit=crop",
-        featured: false,
-        slug: "mastering-nextjs-15"
-    },
-    {
-        id: 3,
-        title: "Scaling Your Agency",
-        excerpt: "Strategies for growth, client retention, and building a world-class team.",
-        category: "Business",
-        date: "Oct 15, 2025",
-        readTime: "6 min read",
-        image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2632&auto=format&fit=crop",
-        featured: false,
-        slug: "scaling-your-agency"
-    },
-    {
-        id: 4,
-        title: "Typography in 2026",
-        excerpt: "Why maximalist typography is taking over the web.",
-        category: "Design",
-        date: "Oct 10, 2025",
-        readTime: "4 min read",
-        image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=2000&auto=format&fit=crop",
-        featured: false,
-        slug: "typography-in-2026"
-    },
-    {
-        id: 5,
-        title: "Building Accessible Apps",
-        excerpt: "Ensuring your digital products are usable by everyone, everywhere.",
-        category: "Development",
-        date: "Oct 05, 2025",
-        readTime: "5 min read",
-        image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop",
-        featured: false,
-        slug: "building-accessible-apps"
-    },
-    {
-        id: 6,
-        title: "The Art of Storytelling",
-        excerpt: "How to craft compelling narratives for your brand.",
-        category: "Business",
-        date: "Sep 28, 2025",
-        readTime: "8 min read",
-        image: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?q=80&w=2670&auto=format&fit=crop",
-        featured: false,
-        slug: "art-of-storytelling"
-    }
-];
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                const res = await fetch('/api/v1/blogs');
+                const data = await res.json();
+                setBlogs(Array.isArray(data) ? data : []);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-export default function Blogs() {
-    const [selectedCategory, setSelectedCategory] = useState("All");
-    const [searchQuery, setSearchQuery] = useState("");
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch('/api/admin/blogs/categories');
+                const data = await res.json();
+                setCategories(Array.isArray(data) ? data : []);
+            } catch (e) { console.error(e) }
+        };
 
-    const filteredPosts = blogPosts.filter(post => {
-        const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
-        const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        fetchBlogs();
+        fetchCategories();
+    }, []);
+
+    const filteredBlogs = blogs.filter(blog => {
+        const matchesSearch = blog.title.toLowerCase().includes(search.toLowerCase());
+        const matchesCategory = selectedCategory ? blog.category?.slug === selectedCategory : true;
+        return matchesSearch && matchesCategory;
     });
 
-    const featuredPost = filteredPosts.find(p => p.featured) || filteredPosts[0];
-    const regularPosts = filteredPosts.filter(p => p.id !== featuredPost?.id);
+    const featuredPost = filteredBlogs[0];
+    const otherPosts = filteredBlogs.slice(1);
 
     return (
-        <main className="min-h-screen bg-white dark:bg-[#050505] text-neutral-900 dark:text-white pt-32 pb-20">
+        <div className="min-h-screen bg-white dark:bg-black font-sans">
 
-            {/* Header Section */}
-            <div className="max-w-[1400px] mx-auto px-6 mb-16 md:mb-24">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col md:flex-row md:items-end justify-between gap-8"
-                >
-                    <div>
-                        <span className="font-unbounded font-bold text-blue-600 tracking-widest uppercase text-sm mb-4 block">
-                            Our Journal
-                        </span>
-                        <h1 className="font-unbounded font-black text-5xl md:text-8xl tracking-tighter leading-none">
-                            INSIGHTS
-                        </h1>
-                    </div>
+            <div className="pt-32 pb-16 px-6 md:px-12 max-w-7xl mx-auto text-center">
+                <h1 className="text-5xl md:text-7xl font-unbounded font-black tracking-tighter mb-6 text-black dark:text-white">
+                    Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Insights.</span>
+                </h1>
+                <p className="text-xl text-neutral-500 max-w-2xl mx-auto font-light">
+                    Thoughts on development, design, and the future of SaaS.
+                </p>
+            </div>
 
-                    <p className="font-unbounded text-neutral-500 dark:text-neutral-400 max-w-md text-sm md:text-base leading-relaxed">
-                        Thoughts, ideas, and stories from our team of designers, developers, and strategists.
-                    </p>
-                </motion.div>
-
-                {/* Filters & Search */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="mt-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
-                >
-                    <div className="flex flex-wrap gap-2">
-                        {categories.map((cat) => (
+            <div className="sticky top-20 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-md border-y border-neutral-100 dark:border-neutral-900 py-4 mb-12">
+                <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
+                        <button
+                            onClick={() => setSelectedCategory(null)}
+                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${!selectedCategory ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-neutral-500 hover:text-black dark:hover:text-white'}`}
+                        >
+                            All Posts
+                        </button>
+                        {categories.map(cat => (
                             <button
-                                key={cat}
-                                onClick={() => setSelectedCategory(cat)}
-                                className={`px-4 py-2 rounded-full font-unbounded text-xs font-bold transition-all border ${selectedCategory === cat
-                                    ? 'bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-black dark:border-white'
-                                    : 'bg-transparent text-neutral-500 border-neutral-200 dark:border-neutral-800 hover:border-neutral-400'
-                                    }`}
+                                key={cat.id}
+                                onClick={() => setSelectedCategory(cat.slug)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${selectedCategory === cat.slug ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-neutral-500 hover:text-black dark:hover:text-white'}`}
                             >
-                                {cat}
+                                {cat.name}
                             </button>
                         ))}
                     </div>
 
-                    <div className="relative w-full md:w-auto">
+                    <div className="relative w-full md:w-64">
                         <TbSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
                         <input
                             type="text"
-                            placeholder="Search articles..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full md:w-64 pl-10 pr-4 py-2 bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full font-unbounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-neutral-100 dark:bg-neutral-900 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                         />
                     </div>
-                </motion.div>
+                </div>
             </div>
 
-            <div className="max-w-[1400px] mx-auto px-6">
-
-                {/* Featured Post (Only show if matches query/category and exists) */}
-                {featuredPost && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        className="mb-16 group cursor-pointer"
-                    >
-                        <Link href={`/blogs/${featuredPost.slug}`} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-                            <div className="relative aspect-[16/9] lg:aspect-[4/3] w-full overflow-hidden rounded-[2rem]">
-                                <img
-                                    src={featuredPost.image}
-                                    alt={featuredPost.title}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    priority
-                                />
-                                <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1 rounded-full text-xs font-unbounded font-bold">
-                                    {featuredPost.category}
-                                </div>
-                            </div>
-                            <div className="flex flex-col justify-center">
-                                <div className="flex items-center gap-4 text-xs font-unbounded text-neutral-500 mb-4">
-                                    <span className="flex items-center gap-1"><TbCalendar /> {featuredPost.date}</span>
-                                    <span className="flex items-center gap-1"><TbClock /> {featuredPost.readTime}</span>
-                                </div>
-                                <h2 className="font-unbounded font-black text-3xl md:text-5xl lg:text-6xl leading-tight mb-6 group-hover:text-blue-600 transition-colors">
-                                    {featuredPost.title}
-                                </h2>
-                                <p className="font-unbounded text-neutral-500 dark:text-neutral-400 leading-relaxed mb-8 max-w-lg">
-                                    {featuredPost.excerpt}
-                                </p>
-                                <div className="flex items-center gap-2 font-unbounded font-bold text-sm uppercase tracking-wide group-hover:gap-4 transition-all duration-300">
-                                    Read Article <TbArrowUpRight className="text-lg" />
-                                </div>
-                            </div>
-                        </Link>
-                    </motion.div>
-                )}
-
-                {/* Regular Posts Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-                    <AnimatePresence>
-                        {regularPosts.map((post) => (
-                            <motion.div
-                                key={post.id}
-                                layout
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ duration: 0.3 }}
-                                className="group cursor-pointer"
-                            >
-                                <Link href={`/blogs/${post.slug}`}>
-                                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl mb-6">
-                                        <img
-                                            src={post.image}
-                                            alt={post.title}
-                                            fill
-                                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-unbounded font-bold">
-                                            {post.category}
+            <div className="max-w-7xl mx-auto px-6 md:px-12 pb-32">
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse bg-neutral-100 dark:bg-neutral-900 aspect-[4/3] rounded-2xl"></div>
+                        ))}
+                    </div>
+                ) : filteredBlogs.length > 0 ? (
+                    <>
+                        {!loading && featuredPost && (
+                            <Link href={`/blogs/${featuredPost.slug}`} className="group block mb-20">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                                    <div className="relative aspect-[16/10] bg-neutral-100 dark:bg-neutral-900 rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/5 group-hover:shadow-blue-500/20 transition-all duration-500">
+                                        {featuredPost.image ? (
+                                            <img src={featuredPost.image} alt={featuredPost.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-neutral-100 dark:bg-neutral-900">
+                                                <TbCategory className="text-4xl opacity-20" />
+                                            </div>
+                                        )}
+                                        <div className="absolute top-6 left-6 bg-white/90 dark:bg-black/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+                                            Featured
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3 text-[10px] font-unbounded text-neutral-500 mb-3">
-                                        <span className="flex items-center gap-1"><TbCalendar /> {post.date}</span>
-                                        <span className="flex items-center gap-1"><TbClock /> {post.readTime}</span>
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-4 text-sm font-mono text-neutral-500">
+                                            <span className="flex items-center gap-2"><TbCalendar /> {new Date(featuredPost.createdAt).toLocaleDateString()}</span>
+                                            <span className="w-1 h-1 bg-neutral-300 rounded-full"></span>
+                                            <span className="flex items-center gap-2 text-blue-600 font-bold">{featuredPost.category?.name}</span>
+                                        </div>
+                                        <h2 className="text-4xl md:text-5xl font-bold leading-tight group-hover:text-blue-600 transition-colors">
+                                            {featuredPost.title}
+                                        </h2>
+                                        <p className="text-lg text-neutral-500 line-clamp-3 leading-relaxed">
+                                            {featuredPost.content?.replace(/<[^>]+>/g, '')}
+                                        </p>
+                                        <div className="flex items-center gap-3 pt-4">
+                                            {featuredPost.author?.image ? (
+                                                <img src={featuredPost.author.image} className="w-10 h-10 rounded-full object-cover" />
+                                            ) : (
+                                                <div className="w-10 h-10 bg-neutral-200 dark:bg-neutral-800 rounded-full flex items-center justify-center font-bold">
+                                                    {featuredPost.author?.fullname?.[0] || 'A'}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="font-bold text-sm">{featuredPost.author?.fullname}</p>
+                                                <p className="text-xs text-neutral-500">Author</p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <h3 className="font-unbounded font-bold text-xl md:text-2xl leading-tight mb-3 group-hover:text-blue-600 transition-colors">
-                                        {post.title}
-                                    </h3>
-                                    <p className="font-unbounded text-neutral-500 dark:text-neutral-400 text-xs md:text-sm leading-relaxed mb-4 line-clamp-2">
-                                        {post.excerpt}
-                                    </p>
-                                    <div className="flex items-center gap-1 font-unbounded font-bold text-xs uppercase tracking-wide text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0">
-                                        Read Now <TbArrowUpRight />
+                                </div>
+                            </Link>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+                            {otherPosts.map(blog => (
+                                <Link href={`/blogs/${blog.slug}`} key={blog.id} className="group flex flex-col gap-6">
+                                    <div className="relative aspect-[4/3] bg-neutral-100 dark:bg-neutral-900 rounded-2xl overflow-hidden border border-neutral-100 dark:border-neutral-800">
+                                        {blog.image ? (
+                                            <img src={blog.image} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <TbCategory className="text-4xl opacity-20" />
+                                            </div>
+                                        )}
+                                        <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                                            {blog.category?.name}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-xs font-mono text-neutral-500">
+                                            <TbCalendar className="text-sm" /> {new Date(blog.createdAt).toLocaleDateString()}
+                                        </div>
+                                        <h3 className="text-xl font-bold leading-tight group-hover:text-blue-600 transition-colors">
+                                            {blog.title}
+                                        </h3>
+                                        <p className="text-neutral-500 text-sm line-clamp-2 leading-relaxed">
+                                            {blog.content?.replace(/<[^>]+>/g, '')}
+                                        </p>
+                                        <div className="flex items-center gap-2 text-sm font-bold text-black dark:text-white pt-2 group-hover:translate-x-1 transition-transform">
+                                            Read Article <TbArrowRight />
+                                        </div>
                                     </div>
                                 </Link>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
-
-                {filteredPosts.length === 0 && (
-                    <div className="text-center py-24">
-                        <h3 className="font-unbounded font-bold text-2xl mb-2">No articles found</h3>
-                        <p className="text-neutral-500">Try adjusting your search or filters.</p>
+                            ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className="text-center py-20 text-neutral-500">
+                        <TbSearch className="text-4xl mx-auto mb-4 opacity-20" />
+                        <h3 className="text-xl font-bold">No results found</h3>
+                        <p>Try adjusting your search or category.</p>
                     </div>
                 )}
             </div>
-        </main>
+
+        </div>
     );
-};
+}
