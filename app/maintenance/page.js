@@ -8,9 +8,18 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TbTools, TbRocket, TbClock, TbMail, TbBrandTwitter, TbBrandInstagram, TbBrandLinkedin } from 'react-icons/tb';
+import { TbTools, TbCheck, TbMail, TbBrandTwitter, TbBrandInstagram, TbBrandLinkedin } from 'react-icons/tb';
 
 export default function Maintenance() {
+
+    const tasks = [
+        { task: "Payment System Integration", status: "completed" },
+        { task: "Skeleton Designing", status: "completed" },
+        { task: "Blog System Integration", status: "in-progress" },
+        { task: "Support System Integration", status: "pending" },
+        { task: "We dont have any ideas", status: "pending" }
+    ];
+
     return (
         <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
 
@@ -64,30 +73,50 @@ export default function Maintenance() {
                     </p>
                 </motion.div>
 
-                {/* Progress / Status Features */}
+                {/* Maintenance Roadmap */}
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
+                    className="max-w-2xl mx-auto w-full mb-16 px-6"
                 >
-                    <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-                        <TbRocket className="text-2xl text-blue-500 mb-3 mx-auto" />
-                        <h3 className="font-unbounded font-bold text-sm mb-1">Performance</h3>
-                        <p className="text-xs text-neutral-500">Optimizing core systems</p>
-                    </div>
-                    <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-                        <TbClock className="text-2xl text-blue-500 mb-3 mx-auto" />
-                        <h3 className="font-unbounded font-bold text-sm mb-1">Estimated Time</h3>
-                        <p className="text-xs text-neutral-500">~2 Hours Remaining</p>
-                    </div>
-                    <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-                        <div className="relative w-6 h-6 mx-auto mb-3">
-                            <span className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-75" />
-                            <span className="relative block w-6 h-6 bg-green-500 rounded-full" />
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="font-unbounded font-bold text-lg">System Upgrade Status</h3>
+                            <span className="text-xs font-mono text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                                v2.4.0
+                            </span>
                         </div>
-                        <h3 className="font-unbounded font-bold text-sm mb-1">Status</h3>
-                        <p className="text-xs text-neutral-500">Deployment in progress</p>
+
+                        <div className="space-y-4">
+                            {tasks.map((item, i) => (
+                                <div key={i} className="flex items-center gap-4 group">
+                                    <div className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center border transition-all duration-300
+                                        ${item.status === 'completed'
+                                            ? 'bg-green-500 border-green-500 text-black'
+                                            : item.status === 'in-progress'
+                                                ? 'bg-blue-500/20 border-blue-500 text-blue-500 animate-pulse'
+                                                : 'bg-transparent border-white/20 text-transparent'}
+                                    `}>
+                                        {item.status === 'completed' && <TbCheck className="text-sm" />}
+                                        {item.status === 'in-progress' && <div className="w-2 h-2 bg-blue-500 rounded-full" />}
+                                    </div>
+                                    <span className={`
+                                        font-medium text-sm transition-colors
+                                        ${item.status === 'completed' ? 'text-white/40 line-through' : 'text-white'}
+                                        ${item.status === 'in-progress' ? 'text-blue-400' : ''}
+                                    `}>
+                                        {item.task}
+                                    </span>
+                                    {item.status === 'in-progress' && (
+                                        <span className="ml-auto text-[10px] font-bold uppercase tracking-wider text-blue-500 animate-pulse">
+                                            Processing
+                                        </span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </motion.div>
 

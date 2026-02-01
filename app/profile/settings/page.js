@@ -23,10 +23,8 @@ import {
 export default function AccountSettings() {
     const { data: session, status, update } = useSession();
 
-    // Tab State
     const [activeTab, setActiveTab] = useState('personal');
 
-    // Form States
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +32,6 @@ export default function AccountSettings() {
     const [currentPassword, setCurrentPassword] = useState('')
     const [newPassword, setNewPassword] = useState('')
 
-    // Populate data when session is ready
     useEffect(() => {
         if (session?.user) {
             setName(session.user.name || '');
@@ -55,7 +52,7 @@ export default function AccountSettings() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/user', {
+            const response = await fetch('/api/v1/users', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -90,7 +87,7 @@ export default function AccountSettings() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('/api/user', {
+            const response = await fetch('/api/v1/users', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

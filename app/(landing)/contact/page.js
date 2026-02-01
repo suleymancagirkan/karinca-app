@@ -19,7 +19,7 @@ export default function Contact() {
         return (
             <div className="min-h-screen pt-32 pb-20 flex flex-col justify-center">
                 <UnderConstruction
-                    title="Communication Hub"
+                    title="Under Construction"
                     message="We are setting up our new global support lines. Reach out via email in the meantime."
                 />
             </div>

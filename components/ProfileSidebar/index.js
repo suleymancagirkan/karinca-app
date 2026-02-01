@@ -2,40 +2,41 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { TbUserCircle, TbSettings, TbLogout, TbStar, TbShieldLock, TbBell, TbRocket, TbCreditCard, TbBrandProducthunt } from "react-icons/tb";
+import { TbUserCircle, TbSettings, TbLogout, TbStar, TbShieldLock, TbBell, TbRocket, TbCreditCard, TbBrandProducthunt, TbDashboard, TbDashboardFilled, TbUserFilled, TbSettingsFilled, TbCloudComputing, TbCloudFilled, TbCreditCardFilled, TbLifebuoyFilled, TbStarFilled } from "react-icons/tb";
 import { useRouter, usePathname } from 'next/navigation';
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 
 const menuItems = [
   {
-    label: "Dashboard",
-    icon: <TbUserCircle className="text-xl" />,
-    href: "/dashboard",
+    label: "Profile",
+    icon: <TbUserFilled className="text-xl" />,
+    href: "/profile",
   },
   {
     label: "Settings",
-    icon: <TbSettings className="text-xl" />,
+    icon: <TbSettingsFilled className="text-xl" />,
     href: "/profile/settings",
   },
   {
     label: "My Services",
-    icon: <TbBrandProducthunt className="text-xl" />,
+    icon: <TbCloudFilled className="text-xl" />,
     href: "/profile/services",
   },
   {
     label: "Billing",
-    icon: <TbCreditCard className="text-xl" />,
+    icon: <TbCreditCardFilled className="text-xl" />,
     href: "/profile/billing",
   },
   {
     label: "Support",
-    icon: <TbBell className="text-xl" />,
+    icon: <TbLifebuoyFilled className="text-xl" />,
     href: "/profile/support",
   },
   {
     label: "Premium",
-    icon: <TbStar className="text-xl" />,
+    icon: <TbStarFilled className="text-xl" />,
     href: "/premium",
   },
 ];
@@ -110,9 +111,20 @@ export default function ProfileSidebar() {
         })}
       </nav>
 
-      <div className="h-px w-full bg-neutral-100 dark:bg-neutral-800 my-8" />
+      <div className="h-px w-full bg-neutral-100 dark:bg-neutral-800 my-5" />
 
-      {/* Logout */}
+      {session?.user?.role === "admin" && (
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors w-full group"
+        >
+          <TbDashboardFilled className="text-xl group-hover:-translate-x-1 transition-transform" />
+          <span className="font-unbounded text-xs font-bold tracking-wide">
+            Dashboard
+          </span>
+        </Link>
+      )}
+
       <button
         onClick={() => signOut({ callbackUrl: "/" })}
         className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors w-full group"

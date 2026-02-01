@@ -35,7 +35,9 @@ import {
     TbTicket,
     TbChevronDown,
     TbQuestionMark,
-    TbDashboard
+    TbDashboard,
+    TbCloudFilled,
+    TbLifebuoyFilled
 } from "react-icons/tb";
 import { signOut, useSession } from 'next-auth/react';
 
@@ -57,13 +59,13 @@ export default function Header() {
 
     const items = [
         {
-            name: 'Our Solutions',
-            id: 'products',
+            name: 'Services',
+            id: 'services',
             isButton: true,
             subItems: [
-                { name: 'E-Commerce', description: 'Complete store infrastructure.', route: '/pricing/e-commerce', icon: <TbShoe /> },
-                { name: 'Business', description: 'Streamline operations.', route: '/pricing/business', icon: <TbBuilding /> },
-                { name: 'Analytics', description: 'Detailed insights.', route: '/pricing/analytics', icon: <TbActivity /> },
+                { name: 'Web Development', description: 'Custom websites for your brand.', route: '/services/web-development', icon: <TbBuilding /> },
+                { name: 'E-Commerce', description: 'Scalable online stores.', route: '/services/e-commerce', icon: <TbShoe /> },
+                { name: 'Digital Growth', description: 'SEO & Analytics solutions.', route: '/services/growth', icon: <TbActivity /> },
             ]
         },
         { name: 'Blogs', route: '/blogs', id: 'blogs' },
@@ -75,8 +77,9 @@ export default function Header() {
     const profileItems = [
         { name: 'Profile', route: '/profile', icon: <TbUserFilled className="text-lg" /> },
         { name: 'Settings', route: '/profile/settings', icon: <TbSettingsFilled className="text-lg" /> },
+        { name: 'Services', route: '/profile/services', icon: <TbCloudFilled className="text-lg" /> },
         { name: 'Billing', route: '/profile/billing', icon: <TbCreditCardFilled className="text-lg" /> },
-        { name: 'Support', route: '/profile/support', icon: <TbTicket className="text-lg" /> },
+        { name: 'Support', route: '/profile/support', icon: <TbLifebuoyFilled className="text-lg" /> },
     ];
 
 
@@ -117,7 +120,7 @@ export default function Header() {
                                     className='relative'
                                     onMouseEnter={() => {
                                         setHoveredNav(item.id || item.name);
-                                        if (item.subItems) setDropdown('products');
+                                        if (item.subItems) setDropdown(item.id);
                                     }}
                                     onMouseLeave={() => {
                                         setHoveredNav(null);
@@ -125,12 +128,12 @@ export default function Header() {
                                 >
                                     {item.isButton ? (
                                         <button
-                                            onClick={() => setDropdown(dropdown === 'products' ? null : 'products')}
-                                            className={`relative z-10 px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex items-center gap-1 ${dropdown === 'products' ? 'text-black dark:text-white' : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
+                                            onClick={() => setDropdown(dropdown === item.id ? null : item.id)}
+                                            className={`relative z-10 px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex items-center gap-1 ${dropdown === item.id ? 'text-black dark:text-white' : 'text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white'
                                                 }`}
                                         >
                                             {item.name}
-                                            <motion.span animate={{ rotate: dropdown === 'products' ? 180 : 0 }}>
+                                            <motion.span animate={{ rotate: dropdown === item.id ? 180 : 0 }}>
                                                 <TbChevronDown className='text-xs opacity-70' />
                                             </motion.span>
                                         </button>
@@ -152,8 +155,8 @@ export default function Header() {
                                     )}
 
                                     <AnimatePresence>
-                                        {item.subItems && dropdown === 'products' && (item.id || item.name) === hoveredNav && (
-                                            <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-[600px]" onMouseEnter={() => setDropdown('products')} onMouseLeave={() => setDropdown(null)}>
+                                        {item.subItems && dropdown === item.id && (item.id || item.name) === hoveredNav && (
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-[600px]" onMouseEnter={() => setDropdown(item.id)} onMouseLeave={() => setDropdown(null)}>
                                                 <motion.div
                                                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                                     animate={{ opacity: 1, scale: 1, y: 0 }}

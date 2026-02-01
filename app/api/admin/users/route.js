@@ -3,6 +3,17 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { getAllUsers } from '@/services/user';
+
+export async function GET() {
+    try {
+        const users = await getAllUsers();
+        return NextResponse.json(users);
+    } catch (error) {
+        console.error("Get Users Error:", error);
+        return new NextResponse(error.message || 'Internal Error', { status: 500 });
+    }
+}
 
 export async function PUT(request) {
     try {

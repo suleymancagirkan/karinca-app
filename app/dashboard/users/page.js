@@ -14,9 +14,9 @@ import {
     TbShieldLock
 } from 'react-icons/tb';
 import { formatDate, UserBadge } from '@/lib/functions';
-import EditUserModal from '@/components/Modals/EditUserModal';
-import DeleteUserModal from '@/components/Modals/DeleteUserModal';
-import AddUserModal from '@/components/Modals/AddUserModal';
+import EditUserModal from '@/components/Modals/Users/EditUserModal';
+import DeleteUserModal from '@/components/Modals/Users/DeleteUserModal';
+import AddUserModal from '@/components/Modals/Users/AddUserModal';
 
 export default function UsersPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +35,7 @@ export default function UsersPage() {
 
     useEffect(() => {
         async function fetchUsers() {
-            const response = await fetch('/api/user');
+            const response = await fetch('/api/admin/users');
             const data = await response.json();
             setUsers(data);
         }

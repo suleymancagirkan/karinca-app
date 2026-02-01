@@ -7,8 +7,8 @@
  * Aligned with the 'Unbounded' design system.
  */
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     TbServer,
     TbDatabase,
@@ -17,58 +17,46 @@ import {
     TbPlus,
     TbDotsVertical,
     TbCalendarTime,
-    TbArrowUpRight
+    TbArrowUpRight,
+    TbExternalLink,
+    TbSettings,
+    TbBox
 } from 'react-icons/tb';
+import Link from 'next/link';
 
 export default function ServicesPage() {
+    const [services, setServices] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const activeServices = [
-        {
-            id: 1,
-            name: "Corporate Website Hosting",
-            type: "Hosting",
-            plan: "Enterprise",
-            status: "Active",
-            renewal: "Oct 24, 2026",
-            icon: <TbServer />,
-            color: "text-blue-600"
-        },
-        {
-            id: 2,
-            name: "Database Cluster A",
-            type: "Infrastructure",
-            plan: "Standard",
-            status: "Active",
-            renewal: "Nov 01, 2025",
-            icon: <TbDatabase />,
-            color: "text-purple-600"
-        },
-        {
-            id: 3,
-            name: "Q4 Marketing Campaign",
-            type: "Marketing",
-            plan: "One-time",
-            status: "In Progress",
-            renewal: "Ends Dec 31",
-            icon: <TbChartDots />,
-            color: "text-orange-500"
-        }
-    ];
+    useEffect(() => {
+        const fetchServices = async () => {
+            try {
+                const res = await fetch('/api/v1/users/subscriptions');
+                if (res.ok) {
+                    const data = await res.json();
+                    setServices(data);
+                }
+            } catch (error) {
+                console.error('Failed to load services:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
 
-    const pastServices = [
-        {
-            id: 4,
-            name: "Logo Redesign",
-            type: "Design",
-            status: "Completed",
-            date: "Sep 15, 2025",
-            icon: <TbBrush />,
-            color: "text-neutral-400"
-        }
-    ];
+        fetchServices();
+    }, []);
+
+    const getIconForCategory = (categoryName) => {
+        const lower = (categoryName || '').toLowerCase();
+        if (lower.includes('hosting')) return <TbServer />;
+        if (lower.includes('database')) return <TbDatabase />;
+        if (lower.includes('design')) return <TbBrush />;
+        if (lower.includes('marketing')) return <TbChartDots />;
+        return <TbBox />;
+    };
 
     return (
-        <div className="w-full max-w-5xl mx-auto">
+        <div className="w-full max-w-5xl mx-auto px-6 py-12">
 
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
@@ -81,95 +69,108 @@ export default function ServicesPage() {
                     </h1>
                 </div>
 
-                <button className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full hover:scale-105 transition-transform group">
-                    <TbPlus className="text-lg" />
-                    <span className="font-unbounded font-bold text-xs">New Service</span>
-                </button>
+                <Link href="/pricing">
+                    <button className="flex items-center gap-2 px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-full hover:scale-105 transition-transform group shadow-lg shadow-neutral-200 dark:shadow-neutral-800">
+                        <TbPlus className="text-lg" />
+                        <span className="font-unbounded font-bold text-xs">New Service</span>
+                    </button>
+                </Link>
             </div>
 
             {/* Active Services List */}
-            <div className="mb-16">
-                <div className="flex items-center gap-2 mb-6">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <h2 className="font-unbounded font-bold text-sm uppercase tracking-wider text-neutral-500">Active Subscriptions</h2>
+            {isLoading ? (
+                <div className="p-12 text-center text-neutral-500 font-unbounded text-sm">
+                    Loading services...
                 </div>
+            ) : services.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-16 bg-neutral-50 dark:bg-neutral-900 rounded-[2rem] border border-neutral-100 dark:border-neutral-800 text-center">
+                    <TbBox className="text-4xl text-neutral-300 mb-4" />
+                    <h3 className="font-unbounded font-bold text-lg text-neutral-900 dark:text-white mb-2">No Active Services</h3>
+                    <p className="text-neutral-500 max-w-sm mx-auto mb-8">
+                        You don't have any active subscriptions yet. Explore our plans to get started.
+                    </p>
+                    <Link href="/pricing">
+                        <span className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold font-unbounded text-xs hover:bg-blue-700 transition-colors">
+                            Browse Plans
+                        </span>
+                    </Link>
+                </div>
+            ) : (
+                <div className="mb-16">
+                    <div className="flex items-center gap-2 mb-6">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <h2 className="font-unbounded font-bold text-sm uppercase tracking-wider text-neutral-500">Active Subscriptions</h2>
+                    </div>
 
-                <div className="grid grid-cols-1 gap-4">
-                    {activeServices.map((service, i) => (
-                        <motion.div
-                            key={service.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.1 }}
-                            className="group relative p-6 md:p-8 rounded-[2rem] bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors flex flex-col md:flex-row items-start md:items-center gap-6"
-                        >
-                            {/* Icon */}
-                            <div className={`w-14 h-14 rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-2xl ${service.color}`}>
-                                {service.icon}
-                            </div>
-
-                            {/* Info */}
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-1">
-                                    <h3 className="font-unbounded font-bold text-lg leading-tight">
-                                        {service.name}
-                                    </h3>
-                                    <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-black border border-neutral-200 dark:border-neutral-800 text-[10px] font-unbounded font-bold uppercase text-neutral-500">
-                                        {service.plan}
-                                    </span>
-                                </div>
-                                <p className="font-unbounded text-xs text-neutral-500">
-                                    {service.type}
-                                </p>
-                            </div>
-
-                            {/* Status & Date */}
-                            <div className="flex items-center gap-8 w-full md:w-auto mt-2 md:mt-0 justify-between md:justify-end">
-                                <div className="text-right">
-                                    <div className="flex items-center gap-1 justify-end text-neutral-900 dark:text-white font-unbounded font-bold text-xs">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                        {service.status}
+                    <div className="grid grid-cols-1 gap-4">
+                        <AnimatePresence>
+                            {services.map((service, i) => (
+                                <motion.div
+                                    key={service.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="group relative p-6 md:p-8 rounded-[1.5rem] bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all flex flex-col md:flex-row items-center gap-6"
+                                >
+                                    {/* Icon */}
+                                    <div className="w-12 h-12 rounded-xl bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 flex items-center justify-center text-2xl text-neutral-600 dark:text-neutral-400 shrink-0">
+                                        {getIconForCategory(service.category?.name)}
                                     </div>
-                                    <div className="flex items-center gap-1 text-[10px] text-neutral-400 font-unbounded mt-1">
-                                        <TbCalendarTime /> Renews {service.renewal}
+
+                                    {/* Info */}
+                                    <div className="flex-1 min-w-0 flex flex-col gap-1 w-full text-center md:text-left">
+                                        <div className="flex items-center justify-center md:justify-start gap-3">
+                                            <h3 className="font-unbounded font-bold text-lg leading-tight truncate text-neutral-900 dark:text-white">
+                                                {service.category?.name || 'Service'}
+                                            </h3>
+                                            <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-[10px] font-unbounded font-bold uppercase text-neutral-600 dark:text-neutral-400 shrink-0">
+                                                {service.tier?.name}
+                                            </span>
+                                        </div>
+
+                                        {/* Meta Info */}
+                                        <div className="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-1 text-xs font-medium text-neutral-400">
+                                            <span className="flex items-center gap-1">
+                                                <TbCalendarTime className="text-sm" /> Renews: {new Date(service.endDate).toLocaleDateString()}
+                                            </span>
+                                            {service.theme?.name && (
+                                                <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400">
+                                                    <TbBrush className="text-sm" /> Theme: {service.theme.name}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
 
-                                <button className="p-2 -mr-2 text-neutral-400 hover:text-black dark:hover:text-white transition-colors">
-                                    <TbDotsVertical className="text-xl" />
-                                </button>
-                            </div>
+                                    {/* Actions */}
+                                    <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0 justify-center md:justify-end shrink-0">
 
-                            {/* Hover Action */}
-                            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity hidden md:block pointer-events-none">
-                                <TbArrowUpRight className="text-2xl text-blue-500" />
-                            </div>
-                        </motion.div>
-                    ))}
+                                        <button className="flex items-center gap-2 px-4 py-2 bg-neutral-100 dark:bg-neutral-900 text-neutral-900 dark:text-white rounded-xl font-unbounded font-bold text-xs hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors">
+                                            <TbArrowUpRight className="text-lg rotate-180" /> Download
+                                        </button>
+
+                                        {service.theme?.url ? (
+                                            <a
+                                                href={service.theme.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-unbounded font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-neutral-500/10"
+                                            >
+                                                Launch <TbExternalLink className="text-lg" />
+                                            </a>
+                                        ) : (
+                                            <button className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-500 rounded-xl font-unbounded font-bold text-xs cursor-not-allowed opacity-50">
+                                                <TbSettings className="text-lg" /> Setup Pending
+                                            </button>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* Past / Completed Services */}
-            <div>
-                <h2 className="font-unbounded font-bold text-sm uppercase tracking-wider text-neutral-500 mb-6">Past Services</h2>
-                <div className="grid grid-cols-1 gap-4 opacity-60">
-                    {pastServices.map((service, i) => (
-                        <div key={service.id} className="p-6 rounded-[1.5rem] bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800 flex items-center gap-4">
-                            <div className={`text-xl ${service.color}`}>
-                                {service.icon}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="font-unbounded font-bold text-sm">{service.name}</h4>
-                                <span className="text-xs text-neutral-500">{service.type}</span>
-                            </div>
-                            <div className="text-right">
-                                <span className="font-unbounded font-bold text-xs block">{service.status}</span>
-                                <span className="text-[10px] text-neutral-500">{service.date}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {/* Note: Past services section removed for now as we don't have expired/cancelled fetch API yet, can be added later */}
 
         </div>
     );

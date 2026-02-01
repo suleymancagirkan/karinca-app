@@ -7,234 +7,151 @@
  * Preserves all original functionality while upgrading the UI.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TbCheck, TbX, TbArrowUpRight, TbBuilding, TbShoppingCart, TbDeviceGamepad2, TbCloudComputing } from 'react-icons/tb';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import PurchaseModal from '@/components/Purchase/PurchaseModal';
+import ThemeSelectionModal from '@/components/Purchase/ThemeSelectionModal';
 
 export default function Pricing() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [method, setMethod] = useState('Monthly');
-    const [selectedSector, setSelectedSector] = useState('Corporate');
+    const [selectedSector, setSelectedSector] = useState(null);
     const [selectedSubs, setSelectedSubs] = useState();
     const [billingAddress, setBillingAddress] = useState(null);
+    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+    const [pendingSubs, setPendingSubs] = useState(null);
+
+    const [paymentStatus, setPaymentStatus] = useState(null);
+    const [statusMessage, setStatusMessage] = useState('');
+
+    const [categories, setCategories] = useState([]);
+    const [tiers, setTiers] = useState([]);
+    const [userSubscriptions, setUserSubscriptions] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     const billingTabs = [
         { id: 'Monthly', label: 'Monthly' },
         { id: 'Yearly', label: 'Yearly' },
     ];
 
-    const sectorTabs = [
-        { id: 'Corporate', label: 'Corporate', icon: <TbBuilding /> },
-        { id: 'Ecommerce', label: 'E-commerce', icon: <TbShoppingCart /> },
-    ];
+    useEffect(() => {
+        if (searchParams) {
+            const status = searchParams.get('payment_status');
+            const reason = searchParams.get('reason');
+            if (status) {
+                setPaymentStatus(status);
+                setStatusMessage(reason ? decodeURIComponent(reason) : (status === 'success' ? 'Your payment was completed successfully.' : 'There was an issue with your payment.'));
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, '', newUrl);
+            }
+        }
+    }, [searchParams]);
 
-    const pricingData = {
-        Corporate: [
-            {
-                title: 'Starter',
-                description: 'Perfect for small businesses and startups looking to establish their online presence.',
-                prices: [
-                    { id: 'Monthly', amount: 99 },
-                    { id: 'Yearly', amount: 899 },
-                ],
-                features: [
-                    { text: 'Up to 5 pages', isGood: true },
-                    { text: 'Responsive design', isGood: true },
-                    { text: 'Basic SEO optimization', isGood: true },
-                    { text: 'Contact form', isGood: true },
-                    { text: 'Email support', isGood: true },
-                    { text: 'Custom domain', isGood: false },
-                ],
-            },
-            {
-                title: 'Professional',
-                description: 'Ideal for growing companies that need advanced features and better performance.',
-                prices: [
-                    { id: 'Monthly', amount: 199 },
-                    { id: 'Yearly', amount: 1799 },
-                ],
-                features: [
-                    { text: 'Up to 20 pages', isGood: true },
-                    { text: 'Advanced SEO tools', isGood: true },
-                    { text: 'Analytics dashboard', isGood: true },
-                    { text: 'Custom branding', isGood: true },
-                    { text: 'Priority support', isGood: true },
-                    { text: 'SSL certificate', isGood: true },
-                ],
-            },
-            {
-                title: 'Enterprise',
-                description: 'Complete solution for large organizations with complex requirements.',
-                prices: [
-                    { id: 'Monthly', amount: 399 },
-                    { id: 'Yearly', amount: 3599 },
-                ],
-                features: [
-                    { text: 'Unlimited pages', isGood: true },
-                    { text: 'Custom integrations', isGood: true },
-                    { text: 'Advanced security', isGood: true },
-                    { text: 'Dedicated account manager', isGood: true },
-                    { text: '24/7 phone support', isGood: true },
-                    { text: 'White-label solution', isGood: true },
-                ],
-            },
-        ],
-        Ecommerce: [
-            {
-                title: 'Basic Store',
-                description: 'Start selling online with essential e-commerce features.',
-                prices: [
-                    { id: 'Monthly', amount: 149 },
-                    { id: 'Yearly', amount: 1349 },
-                ],
-                features: [
-                    { text: 'Up to 100 products', isGood: true },
-                    { text: 'Payment gateway integration', isGood: true },
-                    { text: 'Inventory management', isGood: true },
-                    { text: 'Order tracking', isGood: true },
-                    { text: 'Basic analytics', isGood: true },
-                    { text: 'Mobile responsive', isGood: true },
-                ],
-            },
-            {
-                title: 'Growth Store',
-                description: 'Scale your business with advanced e-commerce tools and features.',
-                prices: [
-                    { id: 'Monthly', amount: 299 },
-                    { id: 'Yearly', amount: 2699 },
-                ],
-                features: [
-                    { text: 'Up to 1000 products', isGood: true },
-                    { text: 'Advanced inventory management', isGood: true },
-                    { text: 'Multi-channel selling', isGood: true },
-                    { text: 'Customer reviews system', isGood: true },
-                    { text: 'Email marketing tools', isGood: true },
-                    { text: 'Advanced analytics', isGood: true },
-                ],
-            },
-            {
-                title: 'Enterprise Store',
-                description: 'Complete e-commerce solution for large-scale businesses.',
-                prices: [
-                    { id: 'Monthly', amount: 599 },
-                    { id: 'Yearly', amount: 5399 },
-                ],
-                features: [
-                    { text: 'Unlimited products', isGood: true },
-                    { text: 'Custom payment solutions', isGood: true },
-                    { text: 'Advanced reporting', isGood: true },
-                    { text: 'API access', isGood: true },
-                    { text: 'Dedicated support', isGood: true },
-                    { text: 'Custom integrations', isGood: true },
-                ],
-            },
-        ],
-        Gaming: [
-            {
-                title: 'Indie Developer',
-                description: 'Perfect for indie game developers and small gaming projects.',
-                prices: [
-                    { id: 'Monthly', amount: 79 },
-                    { id: 'Yearly', amount: 719 },
-                ],
-                features: [
-                    { text: 'Basic game hosting', isGood: true },
-                    { text: 'Player management system', isGood: true },
-                    { text: 'Basic analytics', isGood: true },
-                    { text: 'Community features', isGood: true },
-                    { text: 'Email support', isGood: true },
-                    { text: 'Up to 100 concurrent players', isGood: true },
-                ],
-            },
-            {
-                title: 'Studio Package',
-                description: 'Advanced features for game studios and medium-scale projects.',
-                prices: [
-                    { id: 'Monthly', amount: 199 },
-                    { id: 'Yearly', amount: 1799 },
-                ],
-                features: [
-                    { text: 'Advanced game hosting', isGood: true },
-                    { text: 'Player progression system', isGood: true },
-                    { text: 'In-game purchases', isGood: true },
-                    { text: 'Multiplayer support', isGood: true },
-                    { text: 'Priority support', isGood: true },
-                    { text: 'Up to 1000 concurrent players', isGood: true },
-                ],
-            },
-            {
-                title: 'Enterprise Gaming',
-                description: 'Complete gaming infrastructure for large-scale games and studios.',
-                prices: [
-                    { id: 'Monthly', amount: 499 },
-                    { id: 'Yearly', amount: 4499 },
-                ],
-                features: [
-                    { text: 'Dedicated game servers', isGood: true },
-                    { text: 'Advanced matchmaking', isGood: true },
-                    { text: 'Real-time analytics', isGood: true },
-                    { text: 'Custom game APIs', isGood: true },
-                    { text: '24/7 dedicated support', isGood: true },
-                    { text: 'Unlimited concurrent players', isGood: true },
-                ],
-            },
-        ],
-        SaaS: [
-            {
-                title: 'Startup',
-                description: 'Essential tools for SaaS startups to get their product to market quickly.',
-                prices: [
-                    { id: 'Monthly', amount: 199 },
-                    { id: 'Yearly', amount: 1799 },
-                ],
-                features: [
-                    { text: 'User authentication', isGood: true },
-                    { text: 'Basic dashboard', isGood: true },
-                    { text: 'API endpoints', isGood: true },
-                    { text: 'Email notifications', isGood: true },
-                    { text: 'Basic analytics', isGood: true },
-                    { text: 'Up to 1000 users', isGood: true },
-                ],
-            },
-            {
-                title: 'Scale',
-                description: 'Advanced features for growing SaaS companies with expanding user bases.',
-                prices: [
-                    { id: 'Monthly', amount: 399 },
-                    { id: 'Yearly', amount: 3599 },
-                ],
-                features: [
-                    { text: 'Advanced user management', isGood: true },
-                    { text: 'Custom dashboards', isGood: true },
-                    { text: 'Webhook integrations', isGood: true },
-                    { text: 'Advanced analytics', isGood: true },
-                    { text: 'Priority support', isGood: true },
-                    { text: 'Up to 10000 users', isGood: true },
-                ],
-            },
-            {
-                title: 'Enterprise',
-                description: 'Complete SaaS infrastructure for large-scale applications.',
-                prices: [
-                    { id: 'Monthly', amount: 799 },
-                    { id: 'Yearly', amount: 7199 },
-                ],
-                features: [
-                    { text: 'Custom authentication', isGood: true },
-                    { text: 'White-label solution', isGood: true },
-                    { text: 'Advanced integrations', isGood: true },
-                    { text: 'Real-time monitoring', isGood: true },
-                    { text: 'Dedicated account manager', isGood: true },
-                    { text: 'Unlimited users', isGood: true },
-                ],
-            },
-        ],
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [catsRes, tiersRes, subsRes] = await Promise.all([
+                    fetch('/api/admin/categories'),
+                    fetch('/api/admin/tiers'),
+                    fetch('/api/user/subscriptions').catch(err => ({ ok: false })) // Fail gracefully if not logged in
+                ]);
+
+                if (catsRes.ok && tiersRes.ok) {
+                    const catsData = await catsRes.json();
+                    const tiersData = await tiersRes.json();
+
+                    if (subsRes.ok) {
+                        const subsData = await subsRes.json();
+                        setUserSubscriptions(subsData);
+                    }
+
+                    setCategories(catsData);
+
+
+                    // Map DB tiers to UI structure
+                    const mappedTiers = tiersData.map(tier => ({
+                        id: tier.id,
+                        title: tier.name,
+                        description: tier.description || 'No description available',
+                        prices: [
+                            { id: 'Monthly', amount: tier.priceMonthly },
+                            { id: 'Yearly', amount: tier.priceYearly },
+                        ],
+                        features: (tier.features || []).map(f => ({ text: f, isGood: true })),
+                        categoryId: tier.categoryId,
+                        categoryName: tier.category?.name
+                    }));
+
+                    setTiers(mappedTiers);
+
+                    if (catsData.length > 0) {
+                        setSelectedSector(catsData[0].id);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to fetch pricing data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const getCategoryIcon = (name) => {
+        const lowerName = (name || '').toLowerCase();
+        if (lowerName.includes('ecommerce') || lowerName.includes('shop')) return <TbShoppingCart />;
+        if (lowerName.includes('game') || lowerName.includes('gaming')) return <TbDeviceGamepad2 />;
+        if (lowerName.includes('saas') || lowerName.includes('cloud')) return <TbCloudComputing />;
+        return <TbBuilding />;
     };
+
+    const filteredTiers = selectedSector
+        ? tiers.filter(t => t.categoryId === selectedSector)
+        : [];
 
     return (
         <main className="min-h-screen bg-white dark:bg-[#050505] text-neutral-900 dark:text-white pt-24 pb-20 relative overflow-hidden">
+            {/* Status Modal */}
+            <AnimatePresence>
+                {paymentStatus && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
+                            onClick={() => setPaymentStatus(null)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            className="bg-white dark:bg-neutral-900 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-neutral-100 dark:border-neutral-800 relative z-10"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6 ${paymentStatus === 'success' ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'}`}>
+                                {paymentStatus === 'success' ? <TbCheck /> : <TbX />}
+                            </div>
+                            <h3 className="font-unbounded font-bold text-2xl mb-3 text-neutral-900 dark:text-white">
+                                {paymentStatus === 'success' ? 'Payment Successful!' : 'Payment Failed'}
+                            </h3>
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-8 font-medium leading-relaxed">
+                                {statusMessage}
+                            </p>
+                            <button
+                                onClick={() => setPaymentStatus(null)}
+                                className="w-full py-4 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-black font-bold font-unbounded text-sm hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-neutral-900/20"
+                            >
+                                Continue
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Architectural Background */}
             <div className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none">
@@ -277,25 +194,24 @@ export default function Pricing() {
                     >
                         {/* Sector Selector */}
                         <div className="flex flex-wrap justify-center gap-2 p-1.5 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full">
-                            {sectorTabs.map((tab) => (
+                            {categories.map((cat) => (
                                 <button
-                                    key={tab.id}
-                                    onClick={() => setSelectedSector(tab.id)}
-                                    className={`relative px-4 py-2 rounded-full font-unbounded text-xs font-bold transition-all flex items-center gap-2 ${selectedSector === tab.id
+                                    key={cat.id}
+                                    onClick={() => setSelectedSector(cat.id)}
+                                    className={`relative px-4 py-2 rounded-full font-unbounded text-xs font-bold transition-all flex items-center gap-2 ${selectedSector === cat.id
                                         ? 'text-white'
                                         : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
                                         }`}
                                 >
-                                    {selectedSector === tab.id && (
+                                    {selectedSector === cat.id && (
                                         <motion.div
                                             layoutId="activeSector"
                                             className="absolute inset-0 bg-neutral-900 dark:bg-white rounded-full"
                                             transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                                         />
                                     )}
-                                    <span className={`relative z-10 flex items-center gap-2 ${selectedSector === tab.id ? 'dark:text-black' : ''}`}>
-                                        <span className="text-lg">{tab.icon}</span>
-                                        {tab.label}
+                                    <span className={`relative z-10 flex items-center gap-2 ${selectedSector === cat.id ? 'dark:text-black' : ''}`}>
+                                        {cat.name}
                                     </span>
                                 </button>
                             ))}
@@ -329,61 +245,110 @@ export default function Pricing() {
 
                 {/* Pricing Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
-                    <AnimatePresence mode='wait'>
-                        {pricingData[selectedSector].map((item, index) => (
-                            <motion.div
-                                key={item.title + selectedSector}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ delay: index * 0.1, duration: 0.4 }}
-                                className="group relative p-8 rounded-[2rem] bg-white dark:bg-[#0A0A0A] border border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors duration-300 flex flex-col"
-                            >
-                                <div className="mb-8">
-                                    <h3 className="font-unbounded font-bold text-2xl mb-2">{item.title}</h3>
-                                    <p className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 min-h-[3rem]">
-                                        {item.description}
-                                    </p>
-                                </div>
+                    {isLoading ? (
+                        <div className="col-span-full text-center py-20 text-neutral-500">Loading pricing plans...</div>
+                    ) : (
+                        <AnimatePresence mode='wait'>
+                            {filteredTiers.reverse().map((item, index) => {
+                                // Find if user has subscription in this category
+                                const activeSub = userSubscriptions.find(sub => sub.tier.categoryId === item.categoryId);
+                                const isCurrentPlan = activeSub?.tier?.id === item.id;
 
-                                <div className="mb-8">
-                                    <div className="flex items-end gap-1 mb-1">
-                                        <span className="font-unbounded font-black text-5xl tracking-tighter">
-                                            ₺{item.prices.find((i) => i.id == method)?.amount}
-                                        </span>
-                                        <span className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 mb-2">
-                                            /{method === 'Monthly' ? 'mo' : 'yr'}
-                                        </span>
-                                    </div>
-                                    {method === 'Yearly' && (
-                                        <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] font-unbounded font-bold uppercase">
-                                            Save 20%
-                                        </span>
-                                    )}
-                                </div>
+                                // Determine pricing logic
+                                const currentPrice = item.prices.find((i) => i.id == method)?.amount || 0;
+                                const activePrice = activeSub ? (method === 'Monthly' ? activeSub.tier.priceMonthly : activeSub.tier.priceYearly) : 0;
+                                const isUpgrade = activeSub && currentPrice > activePrice;
+                                const isDowngrade = activeSub && currentPrice < activePrice;
 
-                                <div className="flex-1 space-y-4 mb-8">
-                                    {item.features.map((feature, i) => (
-                                        <div key={i} className="flex items-start gap-3">
-                                            <div className={`mt-0.5 p-0.5 rounded-full ${feature.isGood ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800'}`}>
-                                                {feature.isGood ? <TbCheck className="text-xs" /> : <TbX className="text-xs" />}
+                                return (
+                                    <motion.div
+                                        key={item.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ delay: index * 0.1, duration: 0.4 }}
+                                        className={`group relative p-8 rounded-[2rem] border transition-all duration-300 flex flex-col ${isCurrentPlan
+                                            ? 'bg-neutral-50 dark:bg-neutral-900/50 border-blue-500 dark:border-blue-500'
+                                            : 'bg-white dark:bg-[#0A0A0A] border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500'
+                                            }`}
+                                    >
+                                        {isCurrentPlan && (
+                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-[10px] font-bold font-unbounded rounded-full uppercase tracking-wider">
+                                                Current Plan
                                             </div>
-                                            <span className={`font-unbounded text-xs ${feature.isGood ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 line-through'}`}>
-                                                {feature.text}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
+                                        )}
 
-                                <button
-                                    onClick={() => setSelectedSubs(item)}
-                                    className="w-full py-4 rounded-xl font-unbounded font-bold text-sm bg-neutral-900 dark:bg-white text-white dark:text-black hover:scale-[1.02] active:scale-[0.98] transition-transform flex items-center justify-center gap-2 group-hover:bg-blue-600 dark:group-hover:bg-blue-500 group-hover:text-white dark:group-hover:text-white"
-                                >
-                                    Choose Plan <TbArrowUpRight className="text-lg" />
-                                </button>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                                        <div className="mb-8">
+                                            <h3 className="font-unbounded font-bold text-2xl mb-2">{item.title}</h3>
+                                            <p className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 min-h-[3rem]">
+                                                {item.description}
+                                            </p>
+                                        </div>
+
+                                        <div className="mb-8">
+                                            <div className="flex items-end gap-1 mb-1">
+                                                <span className="font-unbounded font-black text-5xl tracking-tighter">
+                                                    ₺{currentPrice}
+                                                </span>
+                                                <span className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 mb-2">
+                                                    /{method === 'Monthly' ? 'mo' : 'yr'}
+                                                </span>
+                                            </div>
+                                            {method === 'Yearly' && (
+                                                <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] font-unbounded font-bold uppercase">
+                                                    Save 20%
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex-1 space-y-4 mb-8">
+                                            {item.features.map((feature, i) => (
+                                                <div key={i} className="flex items-start gap-3">
+                                                    <div className={`mt-0.5 p-0.5 rounded-full ${feature.isGood ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800'}`}>
+                                                        {feature.isGood ? <TbCheck className="text-xs" /> : <TbX className="text-xs" />}
+                                                    </div>
+                                                    <span className={`font-unbounded text-xs ${feature.isGood ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 line-through'}`}>
+                                                        {feature.text}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <button
+                                            onClick={() => {
+                                                if (isCurrentPlan || isDowngrade) return;
+
+                                                const currentCat = categories.find(c => c.id === selectedSector);
+                                                if (currentCat && currentCat.name === 'Corporate') {
+                                                    setPendingSubs(item);
+                                                    setIsThemeModalOpen(true);
+                                                } else {
+                                                    setSelectedSubs(item);
+                                                }
+                                            }}
+                                            disabled={isCurrentPlan || isDowngrade}
+                                            className={`w-full py-4 rounded-xl font-unbounded font-bold text-sm flex items-center justify-center gap-2 transition-transform ${isCurrentPlan
+                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default'
+                                                : isDowngrade
+                                                    ? 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500 cursor-not-allowed'
+                                                    : 'bg-neutral-900 dark:bg-white text-white dark:text-black hover:scale-[1.02] active:scale-[0.98] group-hover:bg-blue-600 dark:group-hover:bg-blue-500 group-hover:text-white dark:group-hover:text-white'
+                                                }`}
+                                        >
+                                            {isCurrentPlan ? (
+                                                <>Active Plan <TbCheck className="text-lg" /></>
+                                            ) : isDowngrade ? (
+                                                <>Downgrade Unavailable</>
+                                            ) : isUpgrade ? (
+                                                <>Upgrade Plan <TbArrowUpRight className="text-lg" /></>
+                                            ) : (
+                                                <>Choose Plan <TbArrowUpRight className="text-lg" /></>
+                                            )}
+                                        </button>
+                                    </motion.div>
+                                );
+                            })}
+                        </AnimatePresence>
+                    )}
                 </div>
             </div>
 
@@ -393,6 +358,17 @@ export default function Pricing() {
                 billingAddress={billingAddress}
                 setBillingAddress={setBillingAddress}
                 method={method}
+            />
+
+            <ThemeSelectionModal
+                isOpen={isThemeModalOpen}
+                onClose={() => setIsThemeModalOpen(false)}
+                onSelect={(theme) => {
+                    if (pendingSubs) {
+                        setSelectedSubs({ ...pendingSubs, theme: theme });
+                        setIsThemeModalOpen(false);
+                    }
+                }}
             />
         </main>
     );

@@ -4,19 +4,107 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
+  provider = "postgresql"
 }
 
 model User {
-  id        String   @id @default(cuid())
-  fullname  String?
-  username  String?  @unique
-  email     String?  @unique
-  password  String?
-  image     String?
-  role      String   @default("user")
-  bio       String?
+  id            String         @id @default(cuid())
+  fullname      String?
+  username      String?        @unique
+  email         String?        @unique
+  password      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  image         String?
+  role          String         @default("user")
+  bio           String?
+  orders        Order[]
+  subscriptions Subscription[]
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Category {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String
+  description   String?
+  createdAt     DateTime       @default(now())
+  themes        Theme[]
+  tiers         Tier[]
+  subscriptions Subscription[]
+}
+
+model Tier {
+  id            String         @id @default(cuid())
+  name          String
+  priceMonthly  Float
+  priceYearly   Float
+  features      String[]
+  createdAt     DateTime       @default(now())
+  categoryId    String
+  description   String
+  subscriptions Subscription[]
+  category      Category       @relation(fields: [categoryId], references: [id])
+}
+
+model Theme {
+  id            String         @id @default(cuid())
+  name          String
+  url           String
+  description   String?
+  icon          String?
+  categoryId    String
+  createdAt     DateTime       @default(now())
+  category      Category       @relation(fields: [categoryId], references: [id])
+  subscriptions Subscription[]
+}
+
+model Coupon {
+  id           String   @id @default(cuid())
+  code         String   @unique
+  description  String?
+  status       String   @default("active")
+  discount     Float
+  discountType String
+  limit        Int
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  userId         String
+  tierId         String?
+  tierName       String?
+  categoryId     String?
+  categoryName   String?
+  themeId        String?
+  themeName      String?
+  price          Float
+  currency       String   @default("TRY")
+  status         String
+  paymentId      String?
+  conversationId String   @unique
+  couponCode     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  token          String?  @unique
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id         String   @id @default(cuid())
+  userId     String
+  categoryId String
+  tierId     String
+  themeId    String
+  status     String
+  period     String
+  startDate  DateTime @default(now())
+  endDate    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  tier       Tier     @relation(fields: [tierId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+  theme      Theme    @relation(fields: [themeId], references: [id])
 }
