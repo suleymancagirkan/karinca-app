@@ -22,6 +22,8 @@ model User {
   subscriptions Subscription[]
   blogs         Blog[]
   comments      Comment[]
+  tickets       Ticket[]
+  ticketMessages TicketMessage[]
 }
 
 model Category {
@@ -143,4 +145,37 @@ model Comment {
 
   blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Ticket {
+  id        String   @id @default(cuid())
+  userId    String
+  subject   String
+  categoryId String?  // e.g. Billing, Technical, General
+  priority  String
+  status    String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  TicketCategory? @relation(fields: [categoryId], references: [id])
+  messages  TicketMessage[]
+}
+
+model TicketCategory {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  tickets   Ticket[]
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
 }

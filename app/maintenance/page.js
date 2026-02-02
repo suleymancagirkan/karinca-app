@@ -13,11 +13,11 @@ import { TbTools, TbCheck, TbMail, TbBrandTwitter, TbBrandInstagram, TbBrandLink
 export default function Maintenance() {
 
     const tasks = [
-        { task: "Payment System Integration", status: "completed" },
         { task: "Skeleton Designing", status: "completed" },
         { task: "Blog System Integration", status: "completed" },
-        { task: "Support System Integration", status: "in-progress" },
-        { task: "SEO Optimization", status: "pending" }
+        { task: "Support System Integration", status: "completed" },
+        { task: "SEO Optimization", status: "in-progress" },
+        { task: "Finalizing System", status: "pending" }
     ];
 
     return (
