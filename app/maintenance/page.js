@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { TbTools, TbCheck, TbMail, TbBrandTwitter, TbBrandInstagram, TbBrandLinkedin } from 'react-icons/tb';
 
@@ -147,6 +148,10 @@ export default function Maintenance() {
                     <a href="mailto:support@karinca.app" className="font-unbounded text-sm font-bold flex items-center gap-2 mt-4 hover:text-blue-500 transition-colors">
                         <TbMail /> Contact Support
                     </a>
+
+                    <Link href="/login" className="text-[10px] font-mono text-neutral-600 hover:text-white transition-colors mt-8">
+                        Staff Login
+                    </Link>
                 </motion.div>
 
             </div>

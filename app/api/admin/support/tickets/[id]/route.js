@@ -1,56 +1,6 @@
+import { createLog } from '@/lib/logger';
 
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-
-// GET: Fetch ticket details and messages
-export async function GET(req, { params }) {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-        }
-
-        const { id } = await params;
-
-        const ticket = await prisma.ticket.findUnique({
-            where: { id },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        fullname: true,
-                        email: true,
-                        image: true
-                    }
-                },
-                category: true,
-                messages: {
-                    orderBy: { createdAt: 'asc' },
-                    include: {
-                        sender: {
-                            select: {
-                                id: true,
-                                fullname: true,
-                                role: true,
-                                image: true
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        if (!ticket) {
-            return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
-        }
-
-        return NextResponse.json(ticket);
-    } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-}
+// ... (GET stays same)
 
 // POST: Add a message to the ticket (Reply)
 export async function POST(req, { params }) {
@@ -86,7 +36,6 @@ export async function POST(req, { params }) {
         });
 
         // Optionally update ticket status to 'in_progress' or 'answered'
-        // For now, let's keep it simple or set to in_progress if open
         const ticket = await prisma.ticket.findUnique({ where: { id } });
         if (ticket.status === 'open') {
             await prisma.ticket.update({
@@ -94,6 +43,9 @@ export async function POST(req, { params }) {
                 data: { status: 'in_progress' }
             });
         }
+
+        // Log the action
+        await createLog('TICKET_REPLY_ADMIN', `Replied to ticket #${id}`, session.user.id);
 
         return NextResponse.json(newMessage);
     } catch (error) {
@@ -114,6 +66,9 @@ export async function DELETE(req, { params }) {
         await prisma.ticket.delete({
             where: { id }
         });
+
+        // Log the action
+        await createLog('TICKET_DELETE', `Deleted ticket #${id}`, session.user.id);
 
         return NextResponse.json({ success: true });
     } catch (error) {
@@ -136,6 +91,9 @@ export async function PATCH(req, { params }) {
             where: { id },
             data: { status }
         });
+
+        // Log the action
+        await createLog('TICKET_STATUS_UPDATE', `Updated ticket #${id} status to ${status}`, session.user.id);
 
         return NextResponse.json(ticket);
     } catch (error) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { motion } from 'framer-motion';
 import {
@@ -8,25 +8,91 @@ import {
     TbTrendingUp,
     TbUsers,
     TbArrowUpRight,
-    TbClock
+    TbClock,
+    TbTicket,
+    TbCash
 } from 'react-icons/tb';
 
 export default function Dashboard() {
     const { data: session } = useSession();
+    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState({
+        stats: {
+            users: 0,
+            orders: 0,
+            activeTickets: 0,
+            revenue: 0
+        },
+        activities: []
+    });
 
-    // Dummy Stats Data
-    const stats = [
-        { label: "Customers", value: "24.5K", change: "+12%", icon: <TbActivity />, color: "bg-blue-500" },
-        { label: "Products", value: "88%", change: "+5%", icon: <TbTrendingUp />, color: "bg-green-500" },
-        { label: "Users", value: "1,204", change: "+18%", icon: <TbUsers />, color: "bg-purple-500" },
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/admin/dashboard/stats');
+                if (res.ok) {
+                    const jsonData = await res.json();
+                    setData(jsonData);
+                }
+            } catch (error) {
+                console.error("Dashboard stats error:", error);
+                // toast.error("Failed to load dashboard stats"); // Optional: don't annoy user on load
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (session?.user?.role === 'admin') {
+            fetchStats();
+        } else {
+            setLoading(false);
+        }
+    }, [session]);
+
+    // Format time ago
+    const timeAgo = (date) => {
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 31536000;
+        if (interval > 1) return Math.floor(interval) + " years ago";
+        interval = seconds / 2592000;
+        if (interval > 1) return Math.floor(interval) + " months ago";
+        interval = seconds / 86400;
+        if (interval > 1) return Math.floor(interval) + " days ago";
+        interval = seconds / 3600;
+        if (interval > 1) return Math.floor(interval) + " hours ago";
+        interval = seconds / 60;
+        if (interval > 1) return Math.floor(interval) + " minutes ago";
+        return Math.floor(seconds) + " seconds ago";
+    };
+
+    // Construct Stats Array
+    const statsItems = [
+        {
+            label: "Total Revenue",
+            value: `${data.stats.revenue.toLocaleString()} ₺`,
+            // change: "+12%", // We don't have historical data yet for change
+            icon: <TbCash />,
+            color: "bg-green-500"
+        },
+        {
+            label: "Total Users",
+            value: data.stats.users.toLocaleString(),
+            // change: "+5%", 
+            icon: <TbUsers />,
+            color: "bg-blue-500"
+        },
+        {
+            label: "Active Tickets",
+            value: data.stats.activeTickets.toLocaleString(),
+            // change: "+18%", 
+            icon: <TbTicket />,
+            color: "bg-red-500"
+        },
     ];
 
-    // Dummy Activity Data
-    const activities = [
-        { title: "Project 'Karınca' updated", time: "2 hours ago", type: "update" },
-        { title: "New follower received", time: "5 hours ago", type: "social" },
-        { title: "Subscription renewed", time: "1 day ago", type: "system" },
-    ];
+    if (loading) {
+        return <div className="p-8 text-center text-neutral-500">Loading dashboard...</div>;
+    }
 
     return (
         <div className="space-y-12">
@@ -38,7 +104,7 @@ export default function Dashboard() {
                         Overview
                     </span>
                     <h1 className="font-unbounded font-black text-3xl md:text-5xl text-neutral-900 dark:text-white leading-tight">
-                        Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{session?.user?.name?.split(' ')[0] || 'GUEST'}</span>.
+                        Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">{session?.user?.name?.split(' ')[0] || session?.user?.fullname?.split(' ')[0] || 'Admin'}</span>.
                     </h1>
                 </div>
                 <div className="text-right hidden md:block">
@@ -50,7 +116,7 @@ export default function Dashboard() {
 
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {stats.map((stat, index) => (
+                {statsItems.map((stat, index) => (
                     <motion.div
                         key={index}
                         initial={{ opacity: 0, y: 20 }}
@@ -64,9 +130,9 @@ export default function Dashboard() {
                             <div className={`p-3 rounded-2xl text-white ${stat.color} shadow-lg shadow-${stat.color.split('-')[1]}-500/30`}>
                                 <span className="text-xl">{stat.icon}</span>
                             </div>
-                            <span className="flex items-center gap-1 font-unbounded text-[10px] font-bold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
+                            {/* <span className="flex items-center gap-1 font-unbounded text-[10px] font-bold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full">
                                 {stat.change} <TbArrowUpRight />
-                            </span>
+                            </span> */}
                         </div>
 
                         <div className="relative z-10">
@@ -109,24 +175,28 @@ export default function Dashboard() {
                 <div className="p-8 rounded-[2.5rem] bg-neutral-100 dark:bg-neutral-900/50 border border-neutral-200 dark:border-neutral-800">
                     <h3 className="font-unbounded font-bold text-lg mb-6">Recent Activity</h3>
                     <div className="space-y-6">
-                        {activities.map((item, i) => (
-                            <div key={i} className="flex gap-4 items-start">
-                                <div className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                                <div>
-                                    <p className="font-bold text-sm text-neutral-800 dark:text-neutral-200 leading-tight mb-1">
-                                        {item.title}
-                                    </p>
-                                    <div className="flex items-center gap-1 text-xs text-neutral-400 font-medium">
-                                        <TbClock className="text-base" />
-                                        {item.time}
+                        {data.activities.length > 0 ? (
+                            data.activities.map((item, i) => (
+                                <div key={i} className="flex gap-4 items-start">
+                                    <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.type === 'user' ? 'bg-blue-500' : 'bg-green-500'}`} />
+                                    <div>
+                                        <p className="font-bold text-sm text-neutral-800 dark:text-neutral-200 leading-tight mb-1">
+                                            {item.title}
+                                        </p>
+                                        <div className="flex items-center gap-1 text-xs text-neutral-400 font-medium">
+                                            <TbClock className="text-base" />
+                                            {timeAgo(item.time)}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        ) : (
+                            <p className="text-neutral-500 text-sm">No recent activity.</p>
+                        )}
                     </div>
-                    <button className="w-full mt-8 py-3 rounded-xl border border-neutral-300 dark:border-neutral-700 font-unbounded text-xs font-bold hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors">
+                    {/* <button className="w-full mt-8 py-3 rounded-xl border border-neutral-300 dark:border-neutral-700 font-unbounded text-xs font-bold hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors">
                         View History
-                    </button>
+                    </button> */}
                 </div>
             </div>
 

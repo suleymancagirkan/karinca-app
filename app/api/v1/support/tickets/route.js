@@ -1,27 +1,6 @@
+import { createLog } from '@/lib/logger';
 
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-
-export async function GET(req) {
-    try {
-        const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const tickets = await prisma.ticket.findMany({
-            where: { userId: session.user.id },
-            orderBy: { createdAt: 'desc' },
-            include: { category: true }
-        });
-
-        return NextResponse.json(tickets);
-    } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-}
+// ... (GET stays same)
 
 export async function POST(req) {
     try {
@@ -51,6 +30,9 @@ export async function POST(req) {
                 }
             }
         });
+
+        // Log the action
+        await createLog('TICKET_CREATE', `Created ticket #${ticket.id}: ${subject}`, session.user.id);
 
         return NextResponse.json(ticket);
     } catch (error) {

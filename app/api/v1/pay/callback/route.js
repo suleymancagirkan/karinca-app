@@ -105,15 +105,12 @@ export async function POST(req) {
                             } else {
                                 // NEW: Create new subscription
                                 console.log(`Creating NEW subscription for user ${updatedOrder.userId}`);
-                                if (!updatedOrder.themeId) {
-                                    console.warn('WARNING: Creating subscription without themeId, but schema might require it.');
-                                }
                                 await prisma.subscription.create({
                                     data: {
                                         userId: updatedOrder.userId,
                                         tierId: tier.id,
                                         categoryId: tier.categoryId,
-                                        themeId: updatedOrder.themeId || '', // Fallback to empty string to satisfy schema if strict, though likely will validation error if invalid ID
+                                        themeId: updatedOrder.themeId,
                                         status: 'ACTIVE',
                                         period: subPeriod,
                                         endDate: newEndDate

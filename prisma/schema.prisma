@@ -24,6 +24,7 @@ model User {
   comments      Comment[]
   tickets       Ticket[]
   ticketMessages TicketMessage[]
+  logs          SystemLog[]
 }
 
 model Category {
@@ -100,7 +101,7 @@ model Subscription {
   userId     String
   categoryId String
   tierId     String
-  themeId    String
+  themeId    String?
   status     String
   period     String
   startDate  DateTime @default(now())
@@ -110,7 +111,7 @@ model Subscription {
   tier       Tier     @relation(fields: [tierId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
-  theme      Theme    @relation(fields: [themeId], references: [id])
+  theme      Theme?   @relation(fields: [themeId], references: [id])
 }
 
 model Blog {
@@ -178,4 +179,35 @@ model TicketMessage {
 
   ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
+
+model GeneralSettings {
+  id              String   @id @default(cuid())
+  siteName        String   @default("Karinca App")
+  siteDescription String?
+  logoUrl         String?
+  faviconUrl      String?
+  maintenanceMode Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+model SEOSettings {
+  id                String   @id @default(cuid())
+  metaTitle         String?  @default("Karinca App")
+  metaDescription   String?
+  metaKeywords      String?
+  ogImage           String?
+  twitterHandle     String?
+  googleAnalyticsId String?
+  updatedAt         DateTime @updatedAt
+}
+
+model SystemLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   String?
+  userId    String?
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

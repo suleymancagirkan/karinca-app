@@ -64,10 +64,8 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => { } }
             name: 'Settings',
             icon: <TbSettingsFilled className='text-xl ml-2' />,
             subItems: [
-                { name: 'General', route: '/dashboard/setting/general' },
-                { name: 'System', route: '/dashboard/settings/system' },
+                { name: 'General', route: '/dashboard/settings/general' },
                 { name: 'SEO', route: '/dashboard/settings/seo' },
-                { name: 'Languages', route: '/dashboard/settings/languages' },
             ]
         },
     ]

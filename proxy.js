@@ -16,7 +16,14 @@ export async function proxy(request) {
     const role = token?.role;
 
     // 2. Bakım Modu Mantığı
-    if (maintenanceMode && !pathname.startsWith('/maintenance')) {
+    // Adminler bakım modundan etkilenmez
+    // Login ve Register sayfaları da erişilebilir olmalı (Admin girişi için)
+    if (maintenanceMode
+        && !pathname.startsWith('/maintenance')
+        && !pathname.startsWith('/login')
+        && !pathname.startsWith('/register')
+        && !pathname.startsWith('/api/auth')
+        && role !== 'admin') {
         return NextResponse.redirect(new URL('/maintenance', request.url));
     }
 
