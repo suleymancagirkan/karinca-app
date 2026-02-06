@@ -65,7 +65,10 @@ export async function proxy(request) {
         return NextResponse.redirect(new URL('/maintenance', request.url));
     }
 
-    // ... (Rest of logic)
+    // 3.5 Bakım kapalı ama bakım sayfasına gidiyorsa gidemesin.
+    if (maintenanceMode && pathname.startsWith('/maintenance')) {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
 
     // 4. Oturum Kontrolü
     if (pathname.startsWith('/dashboard') && !isAuth) {
