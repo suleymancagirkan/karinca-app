@@ -68,26 +68,7 @@ export async function POST(req) {
             });
         }
 
-        // Update proxy.js maintenance variable
-        try {
-            const fs = require('fs').promises;
-            const path = require('path');
-            const proxyPath = path.join(process.cwd(), 'proxy.js');
-
-            let proxyContent = await fs.readFile(proxyPath, 'utf8');
-
-            // Replace `const maintenanceMode = true;` or `false;`
-            const newMode = data.maintenanceMode ? 'true' : 'false';
-            const regex = /const maintenanceMode = (true|false);/;
-
-            if (regex.test(proxyContent)) {
-                proxyContent = proxyContent.replace(regex, `const maintenanceMode = ${newMode};`);
-                await fs.writeFile(proxyPath, proxyContent, 'utf8');
-            }
-        } catch (fileError) {
-            console.error('Failed to update proxy.js:', fileError);
-            // We don't block the response if file update fails, but we log it.
-        }
+        // Maintenance is now fetched dynamically by middleware from DB API, so no file update needed.
 
         // Log the action
         await createLog('SETTINGS_UPDATE_GENERAL', `General settings updated. Maintenance Mode: ${data.maintenanceMode}`, session.user.id);
