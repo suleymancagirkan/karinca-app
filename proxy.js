@@ -9,7 +9,8 @@ export async function proxy(request) {
     // ÖNEMLİ: secret anahtarın .env dosyasındaki ile aynı olmalı
     const token = await getToken({
         req: request,
-        secret: process.env.NEXTAUTH_SECRET
+        secret: process.env.NEXTAUTH_SECRET,
+        secureCookie: process.env.NODE_ENV === 'production',
     });
 
     const isAuth = !!token;
