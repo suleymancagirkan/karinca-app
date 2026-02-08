@@ -70,7 +70,7 @@ export default function Profile() {
                     <span className="font-unbounded font-bold text-xs uppercase tracking-widest text-neutral-500 mb-2 block">
                         Overview
                     </span>
-                    <h1 className="font-unbounded font-black text-4xl md:text-5xl text-neutral-900 dark:text-white mb-4">
+                    <h1 className="font-unbounded font-black text-3xl md:text-4xl lg:text-5xl text-neutral-900 dark:text-white mb-4">
                         WELCOME BACK, <br /> <span className="text-blue-600">{session?.user?.name.split(" ")[0]}</span>
                     </h1>
                     <p className="font-unbounded text-sm text-neutral-500 max-w-lg">

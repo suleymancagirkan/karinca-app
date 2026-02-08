@@ -35,7 +35,7 @@ export default function Contact() {
                     <span className="font-unbounded font-bold text-xs uppercase tracking-widest text-neutral-500 mb-4 block">
                         Get is touch
                     </span>
-                    <h1 className="font-unbounded font-black text-6xl md:text-8xl mb-8 tracking-tighter">
+                    <h1 className="font-unbounded font-black text-4xl md:text-6xl lg:text-8xl mb-8 tracking-tighter">
                         LET'S <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">TALK</span>
                     </h1>
                 </div>

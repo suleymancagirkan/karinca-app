@@ -96,7 +96,7 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => { } }
                 <div className='flex-1 w-full overflow-y-auto overflow-x-hidden space-y-1'>
                     {items.map((item, index) => (
                         item.route ? (
-                            <Link key={index} href={item.route} className='flex flex-row mt-2 items-center justify-start gap-x-2 w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 py-2 rounded-lg transition'>
+                            <Link key={index} href={item.route} onClick={onClose} className='flex flex-row mt-2 items-center justify-start gap-x-2 w-full text-black/80 dark:text-white/80 hover:bg-neutral-200 dark:hover:bg-neutral-800 py-2 rounded-lg transition'>
                                 {item.icon}
                                 <span className='text-sm'>{item.name}</span>
                             </Link>

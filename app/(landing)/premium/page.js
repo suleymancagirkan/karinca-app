@@ -49,7 +49,7 @@ export default function Premium() {
                         <span className="font-unbounded font-bold text-xs uppercase tracking-widest text-neutral-300">Unlock Full Access</span>
                     </div>
 
-                    <h1 className="font-unbounded font-black text-6xl md:text-8xl lg:text-9xl mb-8 leading-[0.9] tracking-tighter mix-blend-difference">
+                    <h1 className="font-unbounded font-black text-4xl md:text-6xl lg:text-8xl xl:text-9xl mb-8 leading-[0.9] tracking-tighter mix-blend-difference">
                         GO BEYOND <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">LIMITS</span>
                     </h1>
 

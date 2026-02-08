@@ -58,16 +58,16 @@ export default function Header() {
     }, []);
 
     const items = [
-        {
-            name: 'Services',
-            id: 'services',
-            isButton: true,
-            subItems: [
-                { name: 'Web Development', description: 'Custom websites for your brand.', route: '/services/web-development', icon: <TbBuilding /> },
-                { name: 'E-Commerce', description: 'Scalable online stores.', route: '/services/e-commerce', icon: <TbShoe /> },
-                { name: 'Digital Growth', description: 'SEO & Analytics solutions.', route: '/services/growth', icon: <TbActivity /> },
-            ]
-        },
+        // {
+        //     name: 'Services',
+        //     id: 'services',
+        //     isButton: true,
+        //     subItems: [
+        //         { name: 'Web Development', description: 'Custom websites for your brand.', route: '/services/web-development', icon: <TbBuilding /> },
+        //         { name: 'E-Commerce', description: 'Scalable online stores.', route: '/services/e-commerce', icon: <TbShoe /> },
+        //         { name: 'Digital Growth', description: 'SEO & Analytics solutions.', route: '/services/growth', icon: <TbActivity /> },
+        //     ]
+        // },
         { name: 'Blogs', route: '/blogs', id: 'blogs' },
         { name: 'Team', route: '/team', id: 'team' },
         { name: 'Pricing', route: '/pricing', id: 'pricing' },
@@ -331,9 +331,17 @@ export default function Header() {
                                     </div>
                                 ))}
                             </div>
+                            {session?.user && (
+                                <div className="px-6 pb-4 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+                                    <Link href="/profile" className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-medium hover:opacity-90 transition-opacity">
+                                        <TbUserFilled />
+                                        Go to Profile
+                                    </Link>
+                                </div>
+                            )}
 
                             {session?.user?.role === 'admin' && (
-                                <div className="p-6 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
+                                <div className="px-6 pb-3 bg-neutral-50/50 dark:bg-neutral-900/50">
                                     <Link href="/dashboard" className="flex items-center justify-center gap-2 w-full py-3 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-medium hover:opacity-90 transition-opacity">
                                         <TbDashboardFilled />
                                         Go to Dashboard

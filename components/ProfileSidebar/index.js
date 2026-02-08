@@ -51,7 +51,7 @@ export default function ProfileSidebar() {
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className="flex flex-col w-72 h-fit bg-white dark:bg-black rounded-[2rem] p-6 border border-neutral-200 dark:border-neutral-800 relative z-10"
+      className="flex flex-col w-full lg:w-72 h-fit bg-white dark:bg-black rounded-3xl lg:rounded-[2rem] p-6 border border-neutral-200 dark:border-neutral-800 relative z-10 shrink-0"
     >
       {/* Profile Header */}
       <div className="flex flex-col items-center mb-10 pt-4">
@@ -81,7 +81,7 @@ export default function ProfileSidebar() {
       <div className="h-px w-full bg-neutral-100 dark:bg-neutral-800 mb-8" />
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-2 w-full flex-1">
+      <nav className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-2 w-full flex-1">
         {menuItems.map((item, index) => {
           const isActive = pathname === item.href;
           return (

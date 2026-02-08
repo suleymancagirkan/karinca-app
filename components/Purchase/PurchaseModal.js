@@ -77,7 +77,8 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
             });
 
             if (!res.ok) {
-                throw new Error('Payment initialization failed');
+                const errorData = await res.json();
+                throw new Error(errorData.errorMessage || 'Payment initialization failed');
             }
 
             const result = await res.json();
@@ -89,7 +90,7 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
             }
         } catch (error) {
             console.error('Payment Error:', error);
-            alert('An error occurred during payment initialization');
+            alert(error.message);
         } finally {
             setLoading(false);
         }

@@ -143,7 +143,7 @@ export default function UsersPage() {
                                             <span className="text-xs font-medium text-neutral-500">{formatDate(user?.createdAt)}</span>
                                         </td>
                                         <td className="p-6 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                                 <button onClick={() => { setSelectedUser(user); setSelectedAction('edit'); }} className="p-2 text-neutral-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
                                                     <TbEdit className="text-lg" />
                                                 </button>

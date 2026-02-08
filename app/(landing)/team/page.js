@@ -65,7 +65,7 @@ export default function Team() {
           <span className="font-unbounded font-bold text-blue-600 tracking-widest uppercase text-sm mb-6">
             The Collective
           </span>
-          <h1 className="font-unbounded font-black text-6xl md:text-9xl tracking-tighter leading-none mb-8">
+          <h1 className="font-unbounded font-black text-4xl md:text-7xl lg:text-9xl tracking-tighter leading-none mb-8">
             MEET THE <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-neutral-800 to-neutral-400 dark:from-white dark:to-neutral-600">MINDS</span>
           </h1>
           <p className="font-unbounded text-neutral-500 dark:text-neutral-400 max-w-2xl text-sm md:text-lg leading-relaxed">

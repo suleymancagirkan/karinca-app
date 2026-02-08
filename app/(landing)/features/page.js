@@ -84,7 +84,7 @@ export default function FeaturesPage() {
                         <span className="font-unbounded font-bold text-xs uppercase tracking-widest text-neutral-500">System Capabilities</span>
                     </div>
 
-                    <h1 className="font-unbounded font-black text-6xl md:text-8xl mb-8 leading-[0.9] tracking-tighter">
+                    <h1 className="font-unbounded font-black text-4xl md:text-6xl lg:text-8xl mb-8 leading-[0.9] tracking-tighter">
                         ENGINEERED FOR <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">EXCELLENCE</span>
                     </h1>

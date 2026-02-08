@@ -50,7 +50,7 @@ export default function BlogsPage() {
         <div className="min-h-screen bg-white dark:bg-black font-sans">
 
             <div className="pt-32 pb-16 px-6 md:px-12 max-w-7xl mx-auto text-center">
-                <h1 className="text-5xl md:text-7xl font-unbounded font-black tracking-tighter mb-6 text-black dark:text-white">
+                <h1 className="text-4xl md:text-5xl lg:text-7xl font-unbounded font-black tracking-tighter mb-6 text-black dark:text-white">
                     Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Insights.</span>
                 </h1>
                 <p className="text-xl text-neutral-500 max-w-2xl mx-auto font-light">

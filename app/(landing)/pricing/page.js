@@ -176,7 +176,7 @@ function PricingContent() {
                         <span className="font-unbounded font-bold text-blue-600 tracking-widest uppercase text-sm mb-4 block">
                             Invest in Growth
                         </span>
-                        <h1 className="font-unbounded font-black text-6xl md:text-8xl tracking-tighter leading-none mb-6">
+                        <h1 className="font-unbounded font-black text-4xl md:text-6xl lg:text-8xl tracking-tighter leading-none mb-6">
                             PRICING
                         </h1>
                         <p className="font-unbounded text-neutral-500 dark:text-neutral-400 max-w-xl mx-auto text-sm md:text-base leading-relaxed">
@@ -248,7 +248,7 @@ function PricingContent() {
                     {isLoading ? (
                         <div className="col-span-full text-center py-20 text-neutral-500">Loading pricing plans...</div>
                     ) : (
-                        <AnimatePresence mode='wait'>
+                        <AnimatePresence>
                             {filteredTiers.reverse().map((item, index) => {
                                 // Find if user has subscription in this category
                                 const activeSub = userSubscriptions.find(sub => sub.tier.categoryId === item.categoryId);

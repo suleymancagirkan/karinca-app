@@ -74,7 +74,7 @@ export default async function BlogPostPage({ params }) {
                         <span>5 min read</span>
                     </div>
 
-                    <h1 className="text-4xl md:text-6xl font-black font-unbounded leading-[1.1] tracking-tight text-black dark:text-white">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black font-unbounded leading-[1.1] tracking-tight text-black dark:text-white">
                         {blog.title}
                     </h1>
 

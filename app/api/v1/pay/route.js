@@ -167,7 +167,7 @@ export async function POST(req) {
             iyzipay.checkoutFormInitialize.create(requestData, async (err, result) => {
                 if (err) {
                     console.error('Iyzico Init Error:', err);
-                    resolve(Response.json({ status: 'failure', errorMessage: err.message }, { status: 500 }));
+                    resolve(Response.json({ status: 'failure', errorMessage: err.errorMessage || err.message || 'Iyzico initialization failed' }, { status: 500 }));
                 } else {
                     if (result.status === 'success' && result.token) {
                         try {
