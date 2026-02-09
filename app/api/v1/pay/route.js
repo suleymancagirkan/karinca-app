@@ -26,7 +26,7 @@ export async function POST(req) {
         }
 
         const body = await req.json();
-        const { tier, method, billingAddress } = body; // Price ignored from body for security
+        const { tier, method, billingAddress, siteUrl } = body; // Price ignored from body for security
 
         // 1. Fetch Request Tier from DB to get authoritative price
         const targetTier = await prisma.tier.findUnique({
@@ -40,6 +40,20 @@ export async function POST(req) {
 
         const targetPrice = method === 'Monthly' ? targetTier.priceMonthly : targetTier.priceYearly;
         let finalPrice = targetPrice;
+
+        // Check for URL uniqueness if provided
+        if (siteUrl) {
+            const existingSubWithUrl = await prisma.subscription.findFirst({
+                where: {
+                    siteUrl: siteUrl,
+                    status: 'ACTIVE'
+                }
+            });
+
+            if (existingSubWithUrl) {
+                return Response.json({ status: 'failure', errorMessage: 'This URL is already in use by another active subscription.' }, { status: 400 });
+            }
+        }
 
         // 2. Check for existing Active Subscription in the same Category
         const existingSub = await prisma.subscription.findFirst({
@@ -106,7 +120,8 @@ export async function POST(req) {
                 currency: 'TRY',
                 status: 'PENDING',
                 conversationId: conversationId,
-                couponCode: null
+                couponCode: null,
+                siteUrl: siteUrl || null
             }
         });
 

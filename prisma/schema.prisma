@@ -94,6 +94,7 @@ model Order {
   updatedAt      DateTime @updatedAt
   token          String?  @unique
   user           User     @relation(fields: [userId], references: [id])
+  siteUrl        String?
 }
 
 model Subscription {
@@ -112,6 +113,7 @@ model Subscription {
   user       User     @relation(fields: [userId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
   theme      Theme?   @relation(fields: [themeId], references: [id])
+  siteUrl    String?
 }
 
 model Blog {

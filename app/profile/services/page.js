@@ -20,13 +20,17 @@ import {
     TbArrowUpRight,
     TbExternalLink,
     TbSettings,
-    TbBox
+    TbBox,
+    TbWorld
 } from 'react-icons/tb';
 import Link from 'next/link';
+import SetupServiceModal from '@/components/Modals/SetupServiceModal';
 
 export default function ServicesPage() {
     const [services, setServices] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [selectedService, setSelectedService] = useState(null);
+    const [isSetupOpen, setIsSetupOpen] = useState(false);
 
     useEffect(() => {
         const fetchServices = async () => {
@@ -53,6 +57,28 @@ export default function ServicesPage() {
         if (lower.includes('design')) return <TbBrush />;
         if (lower.includes('marketing')) return <TbChartDots />;
         return <TbBox />;
+    };
+
+    const handleSetupSave = async (data) => {
+        try {
+            const res = await fetch('/api/v1/users/subscriptions/setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: selectedService.id, siteUrl: data.siteUrl })
+            });
+
+            if (res.ok) {
+                const updatedService = await res.json();
+                setServices(prev => prev.map(s => s.id === updatedService.id ? { ...s, siteUrl: updatedService.siteUrl } : s));
+                setIsSetupOpen(false);
+                setSelectedService(null);
+            } else {
+                alert("Failed to save setup.");
+            }
+        } catch (error) {
+            console.error("Setup error:", error);
+            alert("An error occurred during setup.");
+        }
     };
 
     return (
@@ -138,6 +164,11 @@ export default function ServicesPage() {
                                                     <TbBrush className="text-sm" /> Theme: {service.theme.name}
                                                 </span>
                                             )}
+                                            {service.siteUrl && (
+                                                <span className="flex items-center gap-1 text-green-500">
+                                                    <TbWorld className="text-sm" /> {service.siteUrl}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -148,18 +179,30 @@ export default function ServicesPage() {
                                             <TbArrowUpRight className="text-lg rotate-180" /> Download
                                         </button>
 
-                                        {service.theme?.url ? (
-                                            <a
-                                                href={service.theme.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-2 px-5 py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-unbounded font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-neutral-500/10"
-                                            >
-                                                Launch <TbExternalLink className="text-lg" />
-                                            </a>
+                                        {service.siteUrl ? (
+                                            <>
+                                                <a
+                                                    href={"https://" + service.siteUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="flex items-center gap-2 px-5 py-2.5 bg-neutral-900 dark:bg-white text-white dark:text-black rounded-xl font-unbounded font-bold text-xs hover:scale-105 active:scale-95 transition-all shadow-lg shadow-neutral-500/10"
+                                                >
+                                                    Launch <TbExternalLink className="text-lg" />
+                                                </a>
+                                                <button
+                                                    onClick={() => { setSelectedService(service); setIsSetupOpen(true); }}
+                                                    className="p-2.5 border border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-500 rounded-xl hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-black dark:hover:text-white transition-colors"
+                                                    title="Edit Url"
+                                                >
+                                                    <TbSettings className="text-lg" />
+                                                </button>
+                                            </>
                                         ) : (
-                                            <button className="flex items-center gap-2 px-4 py-2 border border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-500 rounded-xl font-unbounded font-bold text-xs cursor-not-allowed opacity-50">
-                                                <TbSettings className="text-lg" /> Setup Pending
+                                            <button
+                                                onClick={() => { setSelectedService(service); setIsSetupOpen(true); }}
+                                                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl font-unbounded font-bold text-xs hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20 animate-pulse"
+                                            >
+                                                <TbSettings className="text-lg" /> Setup Now
                                             </button>
                                         )}
                                     </div>
@@ -171,6 +214,14 @@ export default function ServicesPage() {
             )}
 
             {/* Note: Past services section removed for now as we don't have expired/cancelled fetch API yet, can be added later */}
+
+            {/* Setup Modal */}
+            <SetupServiceModal
+                isOpen={isSetupOpen}
+                onClose={() => { setIsSetupOpen(false); setSelectedService(null); }}
+                onSave={handleSetupSave}
+                service={selectedService}
+            />
 
         </div>
     );

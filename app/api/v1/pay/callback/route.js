@@ -96,6 +96,7 @@ export async function POST(req) {
                                         tierId: tier.id,
                                         categoryId: tier.categoryId,
                                         themeId: updatedOrder.themeId, // Carry over theme from order
+                                        siteUrl: updatedOrder.siteUrl, // Update URL
                                         status: 'ACTIVE',
                                         period: subPeriod,
                                         endDate: newEndDate,
@@ -111,9 +112,11 @@ export async function POST(req) {
                                         tierId: tier.id,
                                         categoryId: tier.categoryId,
                                         themeId: updatedOrder.themeId,
+                                        siteUrl: updatedOrder.siteUrl, // Set URL
                                         status: 'ACTIVE',
                                         period: subPeriod,
-                                        endDate: newEndDate
+                                        endDate: newEndDate,
+                                        startDate: now
                                     }
                                 });
                             }

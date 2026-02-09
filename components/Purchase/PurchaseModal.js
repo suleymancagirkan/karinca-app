@@ -13,6 +13,53 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
     const [showSuccess, setShowSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [checkoutHtml, setCheckoutHtml] = useState(null);
+    const [siteUrl, setSiteUrl] = useState('');
+    const [urlError, setUrlError] = useState('');
+    const [isValidatingUrl, setIsValidatingUrl] = useState(false);
+
+    const validateUrl = async (url) => {
+        if (!url) {
+            setUrlError('');
+            return;
+        }
+
+        let cleanUrl = url.replace(/(^\w+:|^)\/\//, '').replace(/\/+$/, '');
+        // We set it back to UI but also use this clean version for validation
+
+        // Domain format check (basic)
+        const pattern = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+
+        if (!pattern.test(cleanUrl)) {
+            setUrlError('Please enter a valid domain (e.g. example.com)');
+            return;
+        }
+
+        setIsValidatingUrl(true);
+        setUrlError('');
+        try {
+            const res = await fetch('/api/v1/validate-url', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: cleanUrl })
+            });
+            const data = await res.json();
+            if (!data.valid) {
+                setUrlError(data.message);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsValidatingUrl(false);
+        }
+    };
+
+    const handleUrlBlur = () => {
+        let cleanUrl = siteUrl.replace(/(^\w+:|^)\/\//, '').replace(/\/+$/, '');
+        if (cleanUrl !== siteUrl) {
+            setSiteUrl(cleanUrl);
+        }
+        validateUrl(cleanUrl); // Validate the clean version
+    };
 
     const handleApplyDiscount = async () => {
         setDiscountError('');
@@ -58,6 +105,18 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
             return;
         }
 
+        if (urlError) {
+            alert('Please fix the URL error before proceeding.');
+            return;
+        }
+
+        if (!siteUrl && type === 'Plan') { // Assume 'Plan' purchase requires a URL if mandatory, user didn't specify strict requirement but it makes sense based on context
+            // Let's make it mandatory if user requested it to be entered here for license check
+            // User said "purchasemodal da url i girebilelim". Let's assume mandatory for now to enforce license.
+            alert('Please enter your website URL for the license.');
+            return;
+        }
+
         setLoading(true);
         try {
             const finalPrice = Math.max(0, selectedSubs?.prices.find((i) => i.id === method)?.amount - appliedDiscount);
@@ -70,6 +129,7 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
                     method,
                     price: finalPrice,
                     billingAddress,
+                    siteUrl,
                     user: {
                         // In a real app, pass logged-in user info here if not available in billingAddress
                     }
@@ -157,6 +217,23 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
                                 </div>
 
                                 <div className="flex flex-col gap-y-2">
+                                    <span className="text-sm font-medium text-black">Website URL (for License)</span>
+                                    <input
+                                        type="url"
+                                        placeholder="https://yourwebsite.com"
+                                        className={`border px-3 py-2 rounded-lg text-black focus:outline-none focus:ring-2 ${urlError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-black'}`}
+                                        value={siteUrl}
+                                        onChange={(e) => {
+                                            setSiteUrl(e.target.value);
+                                            if (urlError) setUrlError(''); // Clear error on edit
+                                        }}
+                                        onBlur={handleUrlBlur}
+                                    />
+                                    {isValidatingUrl && <span className="text-xs text-neutral-500 flex items-center gap-1"><TbLoader className='animate-spin' /> Checking availability...</span>}
+                                    {urlError && <span className="text-xs text-red-500 font-medium">{urlError}</span>}
+                                </div>
+
+                                <div className="flex flex-col gap-y-2">
                                     <span className="text-sm font-medium text-black">Billing Address</span>
                                     {billingAddress ? (
                                         <div className="bg-neutral-100 rounded-lg p-2 text-sm text-black">
@@ -200,7 +277,7 @@ export default function PurchaseModal({ selectedSubs, setSelectedSubs, billingAd
 
                                 <button
                                     onClick={handlePayment}
-                                    disabled={loading || !billingAddress}
+                                    disabled={loading || !billingAddress || !!urlError || (type === 'Plan' && !siteUrl)}
                                     className="bg-black text-white py-3 rounded-lg hover:bg-black/85 transition-colors mt-3 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? <TbLoader className="animate-spin" /> : null}
