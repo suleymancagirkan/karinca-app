@@ -23,7 +23,6 @@ import AddTierModal from '@/components/Modals/Tiers/AddTierModal';
 export default function TiersPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [tiers, setTiers] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [selectedAction, setSelectedAction] = useState(null);
     const [selectedTier, setSelectedTier] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -31,15 +30,6 @@ export default function TiersPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch Categories
-                const categoriesRes = await fetch('/api/admin/categories');
-                if (categoriesRes.ok) {
-                    const categoriesData = await categoriesRes.json();
-                    setCategories(categoriesData);
-                } else {
-                    console.error('Failed to fetch categories');
-                }
-
                 // Fetch Tiers
                 const tiersRes = await fetch('/api/admin/tiers');
                 if (tiersRes.ok) {
@@ -125,8 +115,7 @@ export default function TiersPage() {
     };
 
     const filteredTiers = tiers.filter(tier =>
-        tier.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (tier.category?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
+        tier.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     if (isLoading) {
@@ -157,17 +146,11 @@ export default function TiersPage() {
                     <TbSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 text-lg" />
                     <input
                         type="text"
-                        placeholder="Search tiers by name or category..."
+                        placeholder="Search tiers by name..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full bg-neutral-50 dark:bg-neutral-900 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 rounded-xl py-3 pl-12 pr-4 text-sm font-medium focus:outline-none transition-colors"
                     />
-                </div>
-                <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-5 py-3 bg-neutral-50 dark:bg-neutral-900 rounded-xl font-unbounded text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors">
-                        <TbFilter className="text-lg" />
-                        <span>Filter</span>
-                    </button>
                 </div>
             </div>
 
@@ -186,14 +169,10 @@ export default function TiersPage() {
                             {/* Card Header */}
                             <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <span className="bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 px-3 py-1 rounded-lg text-[10px] font-bold font-unbounded uppercase tracking-wider mb-2 inline-block">
-                                        {tier.category?.name || 'Uncategorized'}
-                                    </span>
                                     <h3 className="font-unbounded font-bold text-xl text-neutral-900 dark:text-white leading-tight">
                                         {tier.name}
                                     </h3>
                                 </div>
-                                {/* Status removed/hidden */}
                             </div>
 
                             <p className="text-xs text-neutral-500 mb-4 line-clamp-2 min-h-[32px]">
@@ -209,8 +188,13 @@ export default function TiersPage() {
                                     <span className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 mb-1.5">/mo</span>
                                 </div>
                                 <div className="text-xs text-neutral-400 font-medium">
-                                    ₺{tier.priceYearly} billed yearly
+                                    ₺{tier.priceYearly} / yr
                                 </div>
+                                {tier.priceLifetime && (
+                                    <div className="text-xs text-neutral-400 font-medium">
+                                        ₺{tier.priceLifetime} / life
+                                    </div>
+                                )}
                             </div>
 
                             {/* Features Preview */}
@@ -253,7 +237,6 @@ export default function TiersPage() {
                     isOpen={selectedAction === 'edit'}
                     onClose={() => { setSelectedAction(null); setSelectedTier(null); }}
                     tier={selectedTier}
-                    categories={categories}
                     onSave={handleUpdateTier}
                 />
             )}
@@ -271,7 +254,6 @@ export default function TiersPage() {
                 <AddTierModal
                     isOpen={selectedAction === 'add'}
                     onClose={() => setSelectedAction(null)}
-                    categories={categories}
                     onSave={handleAddTier}
                 />
             )}

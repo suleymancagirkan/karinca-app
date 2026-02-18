@@ -32,11 +32,6 @@ export async function GET(req) {
                         priceMonthly: true,
                         priceYearly: true
                     }
-                },
-                category: {
-                    select: {
-                        name: true
-                    }
                 }
             }
         });

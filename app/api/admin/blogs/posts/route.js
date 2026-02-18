@@ -11,7 +11,6 @@ export async function GET() {
         const posts = await prisma.blog.findMany({
             orderBy: { createdAt: 'desc' },
             include: {
-                category: true,
                 author: {
                     select: {
                         id: true,
@@ -35,9 +34,9 @@ export async function POST(req) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
-        const { title, content, image, categoryId } = await req.json();
+        const { title, content, image } = await req.json();
 
-        if (!title || !content || !categoryId) {
+        if (!title || !content) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
@@ -55,8 +54,7 @@ export async function POST(req) {
                 content,
                 image,
                 slug,
-                categoryId,
-                authorId: session.user.id // Assuming session user id exists and is the author
+                authorId: session.user.id
             }
         });
 

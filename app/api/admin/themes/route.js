@@ -6,10 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function GET() {
     try {
         const themes = await prisma.theme.findMany({
-            orderBy: { createdAt: 'desc' },
-            include: {
-                category: true // Include category data
-            }
+            orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json(themes);
     } catch (error) {
@@ -25,18 +22,14 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { name, url, description, icon, categoryId } = body;
+        const { name, url, description, icon } = body;
 
         const theme = await prisma.theme.create({
             data: {
                 name,
                 url,
                 description,
-                icon,
-                categoryId
-            },
-            include: {
-                category: true
+                icon
             }
         });
 
@@ -55,7 +48,7 @@ export async function PUT(request) {
         }
 
         const body = await request.json();
-        const { id, name, url, description, icon, categoryId } = body;
+        const { id, name, url, description, icon } = body;
 
         const theme = await prisma.theme.update({
             where: { id },
@@ -63,11 +56,7 @@ export async function PUT(request) {
                 name,
                 url,
                 description,
-                icon,
-                categoryId
-            },
-            include: {
-                category: true
+                icon
             }
         });
 

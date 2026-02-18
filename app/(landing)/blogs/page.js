@@ -8,8 +8,6 @@ import { TbCalendar, TbArrowRight, TbSearch, TbCategory } from 'react-icons/tb';
 export default function BlogsPage() {
     const [blogs, setBlogs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
     const [search, setSearch] = useState('');
 
     useEffect(() => {
@@ -25,22 +23,12 @@ export default function BlogsPage() {
             }
         };
 
-        const fetchCategories = async () => {
-            try {
-                const res = await fetch('/api/admin/blogs/categories');
-                const data = await res.json();
-                setCategories(Array.isArray(data) ? data : []);
-            } catch (e) { console.error(e) }
-        };
-
         fetchBlogs();
-        fetchCategories();
     }, []);
 
     const filteredBlogs = blogs.filter(blog => {
         const matchesSearch = blog.title.toLowerCase().includes(search.toLowerCase());
-        const matchesCategory = selectedCategory ? blog.category?.slug === selectedCategory : true;
-        return matchesSearch && matchesCategory;
+        return matchesSearch;
     });
 
     const featuredPost = filteredBlogs[0];
@@ -60,24 +48,6 @@ export default function BlogsPage() {
 
             <div className="sticky top-20 z-40 bg-white/80 dark:bg-black/80 backdrop-blur-md border-y border-neutral-100 dark:border-neutral-900 py-4 mb-12">
                 <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 no-scrollbar">
-                        <button
-                            onClick={() => setSelectedCategory(null)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${!selectedCategory ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-neutral-500 hover:text-black dark:hover:text-white'}`}
-                        >
-                            All Posts
-                        </button>
-                        {categories.map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.slug)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${selectedCategory === cat.slug ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-neutral-500 hover:text-black dark:hover:text-white'}`}
-                            >
-                                {cat.name}
-                            </button>
-                        ))}
-                    </div>
-
                     <div className="relative w-full md:w-64">
                         <TbSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
                         <input
@@ -119,7 +89,6 @@ export default function BlogsPage() {
                                         <div className="flex items-center gap-4 text-sm font-mono text-neutral-500">
                                             <span className="flex items-center gap-2"><TbCalendar /> {new Date(featuredPost.createdAt).toLocaleDateString()}</span>
                                             <span className="w-1 h-1 bg-neutral-300 rounded-full"></span>
-                                            <span className="flex items-center gap-2 text-blue-600 font-bold">{featuredPost.category?.name}</span>
                                         </div>
                                         <h2 className="text-4xl md:text-5xl font-bold leading-tight group-hover:text-blue-600 transition-colors">
                                             {featuredPost.title}
@@ -156,9 +125,6 @@ export default function BlogsPage() {
                                                 <TbCategory className="text-4xl opacity-20" />
                                             </div>
                                         )}
-                                        <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                                            {blog.category?.name}
-                                        </div>
                                     </div>
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-2 text-xs font-mono text-neutral-500">

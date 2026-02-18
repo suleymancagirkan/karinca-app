@@ -12,7 +12,6 @@ export async function GET(req, { params }) {
         const post = await prisma.blog.findUnique({
             where: { id },
             include: {
-                category: true,
                 author: {
                     select: {
                         fullname: true,
@@ -41,18 +40,12 @@ export async function PUT(req, { params }) {
         }
 
         const { id } = await params;
-        const { title, content, image, categoryId } = await req.json();
+        const body = await req.json();
+        const { title, content, image } = body;
 
-        // If title changes, should we update slug? 
-        // Typically yes if early, no if established. Let's update it for now but handle uniqueness.
         const dataToUpdate = {
-            title, content, image, categoryId
+            title, content, image
         };
-
-        if (title) {
-            // Logic to update slug if needed could go here, omitting for simplicity/SEO stability unless requested
-            // dataToUpdate.slug = slugify(title, ...);
-        }
 
         const post = await prisma.blog.update({
             where: { id },

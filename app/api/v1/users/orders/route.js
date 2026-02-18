@@ -23,8 +23,7 @@ export async function GET(req) {
                 price: true,
                 currency: true,
                 status: true,
-                tierName: true,
-                categoryName: true
+                tierName: true
             }
         });
 

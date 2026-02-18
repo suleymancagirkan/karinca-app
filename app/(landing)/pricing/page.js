@@ -8,26 +8,21 @@
  */
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { TbCheck, TbX, TbArrowUpRight, TbBuilding, TbShoppingCart, TbDeviceGamepad2, TbCloudComputing } from 'react-icons/tb';
+import { TbCheck, TbX, TbArrowUpRight } from 'react-icons/tb';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import PurchaseModal from '@/components/Purchase/PurchaseModal';
-import ThemeSelectionModal from '@/components/Purchase/ThemeSelectionModal';
 
 function PricingContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [method, setMethod] = useState('Monthly');
-    const [selectedSector, setSelectedSector] = useState(null);
     const [selectedSubs, setSelectedSubs] = useState();
     const [billingAddress, setBillingAddress] = useState(null);
-    const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-    const [pendingSubs, setPendingSubs] = useState(null);
 
     const [paymentStatus, setPaymentStatus] = useState(null);
-    const [statusMessage, setStatusMessage] = useState('');
+    const [statusMessage, setStatusMessage] = '';
 
-    const [categories, setCategories] = useState([]);
     const [tiers, setTiers] = useState([]);
     const [userSubscriptions, setUserSubscriptions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +30,7 @@ function PricingContent() {
     const billingTabs = [
         { id: 'Monthly', label: 'Monthly' },
         { id: 'Yearly', label: 'Yearly' },
+        { id: 'Lifetime', label: 'Lifetime' },
     ];
 
     useEffect(() => {
@@ -53,23 +49,18 @@ function PricingContent() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [catsRes, tiersRes, subsRes] = await Promise.all([
-                    fetch('/api/admin/categories'),
+                const [tiersRes, subsRes] = await Promise.all([
                     fetch('/api/admin/tiers'),
-                    fetch('/api/user/subscriptions').catch(err => ({ ok: false })) // Fail gracefully if not logged in
+                    fetch('/api/user/subscriptions').catch(err => ({ ok: false }))
                 ]);
 
-                if (catsRes.ok && tiersRes.ok) {
-                    const catsData = await catsRes.json();
+                if (tiersRes.ok) {
                     const tiersData = await tiersRes.json();
 
                     if (subsRes.ok) {
                         const subsData = await subsRes.json();
                         setUserSubscriptions(subsData);
                     }
-
-                    setCategories(catsData);
-
 
                     // Map DB tiers to UI structure
                     const mappedTiers = tiersData.map(tier => ({
@@ -79,17 +70,13 @@ function PricingContent() {
                         prices: [
                             { id: 'Monthly', amount: tier.priceMonthly },
                             { id: 'Yearly', amount: tier.priceYearly },
+                            { id: 'Lifetime', amount: tier.priceLifetime || null }, // Handle null lifetime price if needed, or filter out
                         ],
                         features: (tier.features || []).map(f => ({ text: f, isGood: true })),
-                        categoryId: tier.categoryId,
-                        categoryName: tier.category?.name
+                        isPopular: tier.isPopular
                     }));
 
                     setTiers(mappedTiers);
-
-                    if (catsData.length > 0) {
-                        setSelectedSector(catsData[0].id);
-                    }
                 }
             } catch (error) {
                 console.error('Failed to fetch pricing data:', error);
@@ -100,18 +87,6 @@ function PricingContent() {
 
         fetchData();
     }, []);
-
-    const getCategoryIcon = (name) => {
-        const lowerName = (name || '').toLowerCase();
-        if (lowerName.includes('ecommerce') || lowerName.includes('shop')) return <TbShoppingCart />;
-        if (lowerName.includes('game') || lowerName.includes('gaming')) return <TbDeviceGamepad2 />;
-        if (lowerName.includes('saas') || lowerName.includes('cloud')) return <TbCloudComputing />;
-        return <TbBuilding />;
-    };
-
-    const filteredTiers = selectedSector
-        ? tiers.filter(t => t.categoryId === selectedSector)
-        : [];
 
     return (
         <main className="min-h-screen bg-white dark:bg-[#050505] text-neutral-900 dark:text-white pt-24 pb-20 relative overflow-hidden">
@@ -190,33 +165,8 @@ function PricingContent() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="flex flex-col md:flex-row items-center gap-6"
+                        className="flex items-center gap-6"
                     >
-                        {/* Sector Selector */}
-                        <div className="flex flex-wrap justify-center gap-2 p-1.5 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full">
-                            {categories.map((cat) => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setSelectedSector(cat.id)}
-                                    className={`relative px-4 py-2 rounded-full font-unbounded text-xs font-bold transition-all flex items-center gap-2 ${selectedSector === cat.id
-                                        ? 'text-white'
-                                        : 'text-neutral-500 hover:text-neutral-900 dark:hover:text-white'
-                                        }`}
-                                >
-                                    {selectedSector === cat.id && (
-                                        <motion.div
-                                            layoutId="activeSector"
-                                            className="absolute inset-0 bg-neutral-900 dark:bg-white rounded-full"
-                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                        />
-                                    )}
-                                    <span className={`relative z-10 flex items-center gap-2 ${selectedSector === cat.id ? 'dark:text-black' : ''}`}>
-                                        {cat.name}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-
                         {/* Billing Period */}
                         <div className="flex gap-2 p-1.5 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-full">
                             {billingTabs.map((tab) => (
@@ -249,16 +199,17 @@ function PricingContent() {
                         <div className="col-span-full text-center py-20 text-neutral-500">Loading pricing plans...</div>
                     ) : (
                         <AnimatePresence>
-                            {filteredTiers.reverse().map((item, index) => {
-                                // Find if user has subscription in this category
-                                const activeSub = userSubscriptions.find(sub => sub.tier.categoryId === item.categoryId);
-                                const isCurrentPlan = activeSub?.tier?.id === item.id;
+                            {tiers.map((item, index) => {
+                                // Find if user has subscription
+                                const activeSub = userSubscriptions.find(sub => sub.tier.id === item.id);
+                                const isCurrentPlan = !!activeSub;
 
                                 // Determine pricing logic
-                                const currentPrice = item.prices.find((i) => i.id == method)?.amount || 0;
-                                const activePrice = activeSub ? (method === 'Monthly' ? activeSub.tier.priceMonthly : activeSub.tier.priceYearly) : 0;
-                                const isUpgrade = activeSub && currentPrice > activePrice;
-                                const isDowngrade = activeSub && currentPrice < activePrice;
+                                const priceObj = item.prices.find((i) => i.id == method);
+                                const currentPrice = priceObj ? priceObj.amount : 0;
+                                const isAvailable = priceObj && priceObj.amount !== null;
+
+                                if (!isAvailable && method === 'Lifetime') return null; // Skip if no lifetime price
 
                                 return (
                                     <motion.div
@@ -269,7 +220,9 @@ function PricingContent() {
                                         transition={{ delay: index * 0.1, duration: 0.4 }}
                                         className={`group relative p-8 rounded-[2rem] border transition-all duration-300 flex flex-col ${isCurrentPlan
                                             ? 'bg-neutral-50 dark:bg-neutral-900/50 border-blue-500 dark:border-blue-500'
-                                            : 'bg-white dark:bg-[#0A0A0A] border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500'
+                                            : item.isPopular
+                                                ? 'bg-neutral-900 text-white border-neutral-900 dark:border-neutral-700'
+                                                : 'bg-white dark:bg-[#0A0A0A] border-neutral-200 dark:border-neutral-800 hover:border-blue-500 dark:hover:border-blue-500'
                                             }`}
                                     >
                                         {isCurrentPlan && (
@@ -277,10 +230,15 @@ function PricingContent() {
                                                 Current Plan
                                             </div>
                                         )}
+                                        {item.isPopular && !isCurrentPlan && (
+                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-amber-200 to-yellow-400 text-black text-[10px] font-bold font-unbounded rounded-full uppercase tracking-wider">
+                                                Most Popular
+                                            </div>
+                                        )}
 
                                         <div className="mb-8">
-                                            <h3 className="font-unbounded font-bold text-2xl mb-2">{item.title}</h3>
-                                            <p className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 min-h-[3rem]">
+                                            <h3 className={`font-unbounded font-bold text-2xl mb-2 ${item.isPopular && !isCurrentPlan ? 'text-white' : ''}`}>{item.title}</h3>
+                                            <p className={`font-unbounded text-xs min-h-[3rem] ${item.isPopular && !isCurrentPlan ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
                                                 {item.description}
                                             </p>
                                         </div>
@@ -290,13 +248,13 @@ function PricingContent() {
                                                 <span className="font-unbounded font-black text-5xl tracking-tighter">
                                                     ₺{currentPrice}
                                                 </span>
-                                                <span className="font-unbounded text-xs text-neutral-500 dark:text-neutral-400 mb-2">
-                                                    /{method === 'Monthly' ? 'mo' : 'yr'}
+                                                <span className={`font-unbounded text-xs mb-2 ${item.isPopular && !isCurrentPlan ? 'text-neutral-400' : 'text-neutral-500 dark:text-neutral-400'}`}>
+                                                    /{method === 'Monthly' ? 'mo' : method === 'Yearly' ? 'yr' : 'life'}
                                                 </span>
                                             </div>
                                             {method === 'Yearly' && (
                                                 <span className="inline-block px-2 py-1 rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] font-unbounded font-bold uppercase">
-                                                    Save 20%
+                                                    Save ~20%
                                                 </span>
                                             )}
                                         </div>
@@ -307,7 +265,7 @@ function PricingContent() {
                                                     <div className={`mt-0.5 p-0.5 rounded-full ${feature.isGood ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800'}`}>
                                                         {feature.isGood ? <TbCheck className="text-xs" /> : <TbX className="text-xs" />}
                                                     </div>
-                                                    <span className={`font-unbounded text-xs ${feature.isGood ? 'text-neutral-700 dark:text-neutral-300' : 'text-neutral-400 line-through'}`}>
+                                                    <span className={`font-unbounded text-xs ${feature.isGood ? (item.isPopular && !isCurrentPlan ? 'text-neutral-300' : 'text-neutral-700 dark:text-neutral-300') : 'text-neutral-400 line-through'}`}>
                                                         {feature.text}
                                                     </span>
                                                 </div>
@@ -316,30 +274,19 @@ function PricingContent() {
 
                                         <button
                                             onClick={() => {
-                                                if (isCurrentPlan || isDowngrade) return;
-
-                                                const currentCat = categories.find(c => c.id === selectedSector);
-                                                if (currentCat && currentCat.name === 'Corporate') {
-                                                    setPendingSubs(item);
-                                                    setIsThemeModalOpen(true);
-                                                } else {
-                                                    setSelectedSubs(item);
-                                                }
+                                                if (isCurrentPlan) return;
+                                                setSelectedSubs(item);
                                             }}
-                                            disabled={isCurrentPlan || isDowngrade}
+                                            disabled={isCurrentPlan}
                                             className={`w-full py-4 rounded-xl font-unbounded font-bold text-sm flex items-center justify-center gap-2 transition-transform ${isCurrentPlan
                                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 cursor-default'
-                                                : isDowngrade
-                                                    ? 'bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500 cursor-not-allowed'
+                                                : item.isPopular
+                                                    ? 'bg-white text-black hover:scale-[1.02] active:scale-[0.98]'
                                                     : 'bg-neutral-900 dark:bg-white text-white dark:text-black hover:scale-[1.02] active:scale-[0.98] group-hover:bg-blue-600 dark:group-hover:bg-blue-500 group-hover:text-white dark:group-hover:text-white'
                                                 }`}
                                         >
                                             {isCurrentPlan ? (
                                                 <>Active Plan <TbCheck className="text-lg" /></>
-                                            ) : isDowngrade ? (
-                                                <>Downgrade Unavailable</>
-                                            ) : isUpgrade ? (
-                                                <>Upgrade Plan <TbArrowUpRight className="text-lg" /></>
                                             ) : (
                                                 <>Choose Plan <TbArrowUpRight className="text-lg" /></>
                                             )}
@@ -358,17 +305,6 @@ function PricingContent() {
                 billingAddress={billingAddress}
                 setBillingAddress={setBillingAddress}
                 method={method}
-            />
-
-            <ThemeSelectionModal
-                isOpen={isThemeModalOpen}
-                onClose={() => setIsThemeModalOpen(false)}
-                onSelect={(theme) => {
-                    if (pendingSubs) {
-                        setSelectedSubs({ ...pendingSubs, theme: theme });
-                        setIsThemeModalOpen(false);
-                    }
-                }}
             />
         </main>
     );

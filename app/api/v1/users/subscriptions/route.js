@@ -24,13 +24,7 @@ export async function GET(req) {
                         name: true,
                         priceMonthly: true,
                         priceYearly: true,
-                        categoryId: true
-                    }
-                },
-                category: {
-                    select: {
-                        name: true,
-                        slug: true
+                        priceLifetime: true
                     }
                 },
                 theme: {

@@ -125,9 +125,6 @@ export default function BlogPostsPage() {
                                 </h3>
                                 <div className="flex flex-wrap items-center gap-4 mt-2 text-xs font-mono text-neutral-500">
                                     <span className="flex items-center gap-1">
-                                        <TbCategory /> {post.category?.name || 'Uncategorized'}
-                                    </span>
-                                    <span className="flex items-center gap-1">
                                         <TbUser /> {post.author?.fullname || 'Unknown'}
                                     </span>
                                     <span className="flex items-center gap-1">

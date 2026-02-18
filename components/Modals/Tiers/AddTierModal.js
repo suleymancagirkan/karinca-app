@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TbX } from 'react-icons/tb';
 
-export default function AddTierModal({ isOpen, onClose, onSave, categories = [] }) {
+// ... imports
+
+export default function AddTierModal({ isOpen, onClose, onSave }) {
     const [formData, setFormData] = useState({
         name: '',
         description: '',
-        categoryId: categories.length > 0 ? categories[0].id : '',
         priceMonthly: '',
         priceYearly: '',
+        priceLifetime: '',
         features: '',
     });
 
@@ -23,6 +25,7 @@ export default function AddTierModal({ isOpen, onClose, onSave, categories = [] 
             ...formData,
             priceMonthly: Number(formData.priceMonthly),
             priceYearly: Number(formData.priceYearly),
+            priceLifetime: formData.priceLifetime ? Number(formData.priceLifetime) : null,
             features: formData.features.split('\n').filter(f => f.trim() !== '')
         };
         onSave(newTier);
@@ -67,7 +70,7 @@ export default function AddTierModal({ isOpen, onClose, onSave, categories = [] 
                         <form onSubmit={handleSubmit} className="p-6 space-y-5">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Name */}
-                                <div className="space-y-2">
+                                <div className="space-y-2 col-span-2 md:col-span-1">
                                     <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Tier Name</label>
                                     <input
                                         type="text"
@@ -80,28 +83,9 @@ export default function AddTierModal({ isOpen, onClose, onSave, categories = [] 
                                     />
                                 </div>
 
-                                {/* Category Selection */}
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Category</label>
-                                    <select
-                                        name="categoryId"
-                                        value={formData.categoryId}
-                                        onChange={handleChange}
-                                        required
-                                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 rounded-xl py-3 px-4 text-sm font-medium focus:outline-none transition-all text-neutral-900 dark:text-white"
-                                    >
-                                        <option value="" disabled>Select Category</option>
-                                        {categories.map((cat) => (
-                                            <option key={cat.id} value={cat.id}>
-                                                {cat.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
                                 {/* Monthly Price */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Monthly Price (₺)</label>
+                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Monthly (₺)</label>
                                     <input
                                         type="number"
                                         name="priceMonthly"
@@ -117,7 +101,7 @@ export default function AddTierModal({ isOpen, onClose, onSave, categories = [] 
 
                                 {/* Yearly Price */}
                                 <div className="space-y-2">
-                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Yearly Price (₺)</label>
+                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Yearly (₺)</label>
                                     <input
                                         type="number"
                                         name="priceYearly"
@@ -127,6 +111,21 @@ export default function AddTierModal({ isOpen, onClose, onSave, categories = [] 
                                         min="0"
                                         step="0.01"
                                         required
+                                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 rounded-xl py-3 px-4 text-sm font-medium focus:outline-none transition-all text-neutral-900 dark:text-white placeholder:text-neutral-400"
+                                    />
+                                </div>
+
+                                {/* Lifetime Price */}
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider ml-1">Lifetime (₺) (Optional)</label>
+                                    <input
+                                        type="number"
+                                        name="priceLifetime"
+                                        value={formData.priceLifetime}
+                                        onChange={handleChange}
+                                        placeholder="0.00"
+                                        min="0"
+                                        step="0.01"
                                         className="w-full bg-neutral-50 dark:bg-neutral-900 border border-transparent focus:border-neutral-300 dark:focus:border-neutral-700 rounded-xl py-3 px-4 text-sm font-medium focus:outline-none transition-all text-neutral-900 dark:text-white placeholder:text-neutral-400"
                                     />
                                 </div>

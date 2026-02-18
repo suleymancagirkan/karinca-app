@@ -191,11 +191,6 @@ export default function BillingPage() {
                                                     <span className="font-unbounded font-bold text-sm text-neutral-900 dark:text-white">
                                                         {order.tierName}
                                                     </span>
-                                                    {order.categoryName && (
-                                                        <span className="text-[10px] text-neutral-500 font-medium mt-0.5">
-                                                            {order.categoryName}
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </td>
                                             <td className="p-6 font-unbounded font-black text-sm text-neutral-900 dark:text-white">

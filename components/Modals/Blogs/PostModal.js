@@ -116,15 +116,18 @@ const MenuBar = ({ editor, onImportMarkdown }) => {
     );
 };
 
+// MenuBar...
+
 export default function PostModal({ isOpen, onClose, onSuccess, post = null }) {
     const [formData, setFormData] = useState({
         title: '',
-        image: '',
-        categoryId: ''
+        image: ''
     });
-    const [categories, setCategories] = useState([]);
+    // Removed categories state
     const [loading, setLoading] = useState(false);
-    const [initialLoading, setInitialLoading] = useState(true);
+    // Removed initialLoading, or keep it false?
+    // We were fetching categories in useEffect. Now we don't.
+    // So initialLoading is not needed or just false.
 
     const editor = useEditor({
         extensions: [
@@ -141,42 +144,19 @@ export default function PostModal({ isOpen, onClose, onSuccess, post = null }) {
         immediatelyRender: false,
     });
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const res = await fetch('/api/admin/blogs/categories');
-                if (res.ok) {
-                    const data = await res.json();
-                    setCategories(data);
-                    if (!post && data.length > 0) {
-                        setFormData(prev => ({ ...prev, categoryId: data[0].id }));
-                    }
-                }
-            } catch (error) {
-                console.error('Failed to fetch categories');
-            } finally {
-                setInitialLoading(false);
-            }
-        };
-
-        if (isOpen) {
-            fetchCategories();
-        }
-    }, [isOpen, post]);
+    // Removed Category Fetching useEffect
 
     useEffect(() => {
         if (post && editor) {
             setFormData({
                 title: post.title,
-                image: post.image || '',
-                categoryId: post.categoryId
+                image: post.image || ''
             });
             editor.commands.setContent(post.content);
         } else if (editor) {
             setFormData({
                 title: '',
-                image: '',
-                categoryId: ''
+                image: ''
             });
             editor.commands.setContent('');
         }
@@ -256,60 +236,42 @@ export default function PostModal({ isOpen, onClose, onSuccess, post = null }) {
 
                     <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
                         <div className="w-full md:w-80 border-r border-neutral-200 dark:border-neutral-800 p-6 space-y-6 overflow-y-auto shrink-0 bg-neutral-50/50 dark:bg-black/50">
-                            {initialLoading ? (
-                                <div className="flex justify-center p-4"><TbLoader className="animate-spin" /></div>
-                            ) : (
-                                <>
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+                                    Post Details
+                                </label>
+                                <div className="space-y-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            Post Details
-                                        </label>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="text-sm text-neutral-700 dark:text-neutral-300 block mb-1">Title</label>
-                                                <input
-                                                    type="text"
-                                                    value={formData.title}
-                                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black focus:ring-2 focus:ring-blue-500 outline-none"
-                                                    placeholder="Enter title"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="text-sm text-neutral-700 dark:text-neutral-300 block mb-1">Category</label>
-                                                <select
-                                                    value={formData.categoryId}
-                                                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black focus:ring-2 focus:ring-blue-500 outline-none"
-                                                >
-                                                    <option value="" disabled>Select...</option>
-                                                    {categories.map(cat => (
-                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm text-neutral-700 dark:text-neutral-300 block mb-1">Feature Image</label>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={formData.image}
-                                                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                                        className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black focus:ring-2 focus:ring-blue-500 outline-none"
-                                                        placeholder="https://..."
-                                                    />
-                                                    <TbPhoto className="absolute left-2.5 top-2.5 text-neutral-400 text-base" />
-                                                </div>
-                                            </div>
+                                        <label className="text-sm text-neutral-700 dark:text-neutral-300 block mb-1">Title</label>
+                                        <input
+                                            type="text"
+                                            value={formData.title}
+                                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                            className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="Enter title"
+                                        />
+                                    </div>
+                                    {/* Category Select Removed */}
+                                    <div>
+                                        <label className="text-sm text-neutral-700 dark:text-neutral-300 block mb-1">Feature Image</label>
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                value={formData.image}
+                                                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                                className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-black focus:ring-2 focus:ring-blue-500 outline-none"
+                                                placeholder="https://..."
+                                            />
+                                            <TbPhoto className="absolute left-2.5 top-2.5 text-neutral-400 text-base" />
                                         </div>
                                     </div>
+                                </div>
+                            </div>
 
-                                    {formData.image && (
-                                        <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 aspect-video relative">
-                                            <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
-                                        </div>
-                                    )}
-                                </>
+                            {formData.image && (
+                                <div className="rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 aspect-video relative">
+                                    <img src={formData.image} alt="Preview" className="w-full h-full object-cover" />
+                                </div>
                             )}
                         </div>
 
@@ -324,7 +286,7 @@ export default function PostModal({ isOpen, onClose, onSuccess, post = null }) {
                     <div className="p-4 border-t border-neutral-100 dark:border-neutral-800 bg-neutral-50 dark:bg-[#0A0A0A] flex justify-end shrink-0">
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || categories.length === 0}
+                            disabled={loading}
                             className="px-8 py-2.5 bg-black dark:bg-white text-white dark:text-black rounded-lg font-bold flex items-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50"
                         >
                             {loading ? <TbLoader className="animate-spin" /> : <TbDeviceFloppy />}

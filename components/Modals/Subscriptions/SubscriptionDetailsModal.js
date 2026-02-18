@@ -115,10 +115,7 @@ export default function SubscriptionDetailsModal({ isOpen, onClose, subscription
                                         <TbRepeat className="text-sm" /> Plan Info
                                     </label>
                                     <div className="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800 h-full">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-xs font-medium text-neutral-500">Category</span>
-                                            <span className="font-unbounded text-xs font-bold text-neutral-900 dark:text-white text-right">{subscription.category?.name || '-'}</span>
-                                        </div>
+
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-xs font-medium text-neutral-500">Tier</span>
                                             <span className="font-unbounded text-xs font-bold text-neutral-900 dark:text-white text-right">{subscription.tier?.name || 'Unknown Tier'}</span>

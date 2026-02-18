@@ -10,7 +10,6 @@ export async function GET(req, { params }) {
         const blog = await prisma.blog.findUnique({
             where: { slug },
             include: {
-                category: true,
                 author: {
                     select: {
                         fullname: true,

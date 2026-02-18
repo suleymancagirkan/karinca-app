@@ -16,7 +16,6 @@ async function getBlog(slug) {
     const blog = await prisma.blog.findUnique({
         where: { slug },
         include: {
-            category: true,
             author: {
                 select: {
                     username: true,
@@ -64,9 +63,6 @@ export default async function BlogPostPage({ params }) {
 
                 <header className="mb-16 space-y-8">
                     <div className="flex flex-wrap items-center gap-4 text-sm font-mono text-neutral-500">
-                        <span className="px-3 py-1 rounded-full border border-neutral-200 dark:border-neutral-800 text-blue-600 font-bold bg-blue-50 dark:bg-blue-900/10">
-                            {blog.category?.name}
-                        </span>
                         <span className="flex items-center gap-2">
                             <TbCalendar /> {new Date(blog.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                         </span>

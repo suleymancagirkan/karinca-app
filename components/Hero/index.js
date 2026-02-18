@@ -13,6 +13,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { TbArrowDown, TbArrowUpRight, TbLayoutGrid } from 'react-icons/tb';
+import Link from 'next/link';
 
 export default function Hero() {
     const ref = useRef(null);
@@ -112,7 +113,7 @@ export default function Hero() {
                         <button className="group hidden sm:flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full border border-neutral-200 dark:border-neutral-800 bg-transparent hover:bg-neutral-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300">
                             <TbArrowUpRight className="text-xl md:text-2xl group-hover:rotate-45 transition-transform" />
                         </button>
-                        <button className="group flex items-center gap-3 md:gap-4 pl-2 pr-6 md:pr-8 py-2 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black hover:scale-105 transition-transform">
+                        <Link href="/services" className="group flex items-center gap-3 md:gap-4 pl-2 pr-6 md:pr-8 py-2 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-black hover:scale-105 transition-transform">
                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-neutral-800 dark:bg-neutral-200 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                                 <TbLayoutGrid />
                             </div>
@@ -120,7 +121,7 @@ export default function Hero() {
                                 <span className="font-unbounded text-[8px] md:text-[10px] font-bold uppercase tracking-wider opacity-60">Discover</span>
                                 <span className="font-unbounded text-xs md:text-sm font-bold">Our Services</span>
                             </div>
-                        </button>
+                        </Link>
                     </div>
                 </motion.div>
             </div>

@@ -137,7 +137,6 @@ export default function OrdersPage() {
                                 <div className="mb-4">
                                     <h3 className="font-unbounded font-bold text-lg text-neutral-900 dark:text-white mb-1 truncate">
                                         {order.tierName || 'Unknown Item'}
-                                        {order.categoryName && <span className="opacity-60 text-sm ml-2 font-normal">• {order.categoryName}</span>}
                                     </h3>
                                     <div className="flex items-center gap-2 text-sm text-neutral-500">
                                         <div className="w-5 h-5 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-bold">

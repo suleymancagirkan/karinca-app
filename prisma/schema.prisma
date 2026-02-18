@@ -25,17 +25,7 @@ model User {
   tickets       Ticket[]
   ticketMessages TicketMessage[]
   logs          SystemLog[]
-}
-
-model Category {
-  id            String         @id @default(cuid())
-  name          String
-  slug          String
-  description   String?
-  createdAt     DateTime       @default(now())
-  themes        Theme[]
-  tiers         Tier[]
-  subscriptions Subscription[]
+  projects      Project[]
 }
 
 model Tier {
@@ -43,12 +33,13 @@ model Tier {
   name          String
   priceMonthly  Float
   priceYearly   Float
+  priceLifetime Float?
   features      String[]
-  createdAt     DateTime       @default(now())
-  categoryId    String
   description   String
+  isPopular     Boolean        @default(false)
+  createdAt     DateTime       @default(now())
   subscriptions Subscription[]
-  category      Category       @relation(fields: [categoryId], references: [id])
+  orders        Order[]
 }
 
 model Theme {
@@ -57,9 +48,7 @@ model Theme {
   url           String
   description   String?
   icon          String?
-  categoryId    String
   createdAt     DateTime       @default(now())
-  category      Category       @relation(fields: [categoryId], references: [id])
   subscriptions Subscription[]
 }
 
@@ -80,8 +69,6 @@ model Order {
   userId         String
   tierId         String?
   tierName       String?
-  categoryId     String?
-  categoryName   String?
   themeId        String?
   themeName      String?
   price          Float
@@ -94,26 +81,46 @@ model Order {
   updatedAt      DateTime @updatedAt
   token          String?  @unique
   user           User     @relation(fields: [userId], references: [id])
+  tier           Tier?    @relation(fields: [tierId], references: [id])
   siteUrl        String?
+  projectId      String?
+  project        Project? @relation(fields: [projectId], references: [id])
 }
 
 model Subscription {
   id         String   @id @default(cuid())
   userId     String
-  categoryId String
   tierId     String
   themeId    String?
   status     String
   period     String
   startDate  DateTime @default(now())
-  endDate    DateTime
+  endDate    DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   tier       Tier     @relation(fields: [tierId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
-  category   Category @relation(fields: [categoryId], references: [id])
   theme      Theme?   @relation(fields: [themeId], references: [id])
   siteUrl    String?
+  project    Project? @relation("SubscriptionToProject")
+}
+
+model Project {
+  id              String   @id @default(cuid())
+  userId          String
+  subscriptionId  String?  @unique
+  siteName        String
+  siteDescription String?
+  domain          String?
+  logoUrl         String?
+  themeConfig     Json?
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user            User     @relation(fields: [userId], references: [id])
+  subscription    Subscription? @relation("SubscriptionToProject", fields: [subscriptionId], references: [id])
+  orders          Order[]
 }
 
 model Blog {
@@ -123,20 +130,11 @@ model Blog {
   image         String?
   slug          String         @unique
   authorId      String
-  categoryId    String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   author        User           @relation(fields: [authorId], references: [id])
-  category      BlogCategory   @relation(fields: [categoryId], references: [id])
   comments      Comment[]
-}
-
-model BlogCategory {
-  id            String   @id @default(cuid())
-  name          String
-  createdAt     DateTime @default(now())
-  blogs         Blog[]
 }
 
 model Comment {

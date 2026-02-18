@@ -41,9 +41,6 @@ export async function POST(req) {
 
         if (result.status === 'success' && result.paymentStatus === 'SUCCESS') {
 
-            // Search by TOKEN instead of conversationId for reliability
-            // We use the 'token' from the request (formData)
-
             if (token) {
                 console.log(`Searching for Order with TOKEN: ${token}`);
 
@@ -55,48 +52,69 @@ export async function POST(req) {
                     if (existingOrder) {
                         console.log(`Order Found: ${existingOrder.id}. Updating status...`);
 
-                        const updatedOrder = await prisma.order.update({
+                        // Update Order Status
+                        await prisma.order.update({
                             where: { id: existingOrder.id },
                             data: {
                                 status: 'PAID',
                                 paymentId: result.paymentId
                             }
                         });
-                        console.log('Order Updated:', updatedOrder.id);
 
                         const tier = await prisma.tier.findUnique({
-                            where: { id: updatedOrder.tierId },
-                            include: { category: true }
+                            where: { id: existingOrder.tierId }
                         });
 
                         if (tier) {
-                            // Check for existing active subscription in same category
+                            // Find existing active subscription for the user
                             const existingSub = await prisma.subscription.findFirst({
                                 where: {
-                                    userId: updatedOrder.userId,
-                                    tier: { categoryId: tier.categoryId },
-                                    status: 'ACTIVE',
-                                    endDate: { gt: new Date() }
+                                    userId: existingOrder.userId,
+                                    status: 'ACTIVE'
+                                    // Removed categoryId check
                                 }
                             });
 
                             const now = new Date();
-                            const subPeriod = updatedOrder.price === tier.priceYearly ? 'Yearly' : 'Monthly'; // Infer period from price match
-                            const daysToAdd = subPeriod === 'Yearly' ? 365 : 30;
 
-                            let newEndDate = new Date();
-                            newEndDate.setDate(newEndDate.getDate() + daysToAdd);
+                            // Determine Period
+                            let subPeriod = 'Monthly';
+                            let daysToAdd = 30;
+
+                            if (existingOrder.price === tier.priceYearly) {
+                                subPeriod = 'Yearly';
+                                daysToAdd = 365;
+                            } else if (tier.priceLifetime && existingOrder.price === tier.priceLifetime) {
+                                subPeriod = 'Lifetime';
+                                daysToAdd = 36500; // 100 years
+                            }
+
+                            let newEndDate = null;
+                            if (subPeriod !== 'Lifetime') {
+                                newEndDate = new Date();
+                                newEndDate.setDate(newEndDate.getDate() + daysToAdd);
+                            } else {
+                                // For Lifetime, we can set it to null or far future. 
+                                // Prisma schema previously had endDate as DateTime? (nullable).
+                                // If nullable, null means forever? Or we use a long date.
+                                // Let's check schema: endDate DateTime?
+                                // Let's use null for true meaningful "no end date" or a far future date if logic requires active checks.
+                                // The check 'endDate: { gt: new Date() }' implies we need a date.
+                                // So let's use 100 years.
+                                newEndDate = new Date();
+                                newEndDate.setFullYear(newEndDate.getFullYear() + 100);
+                            }
 
                             if (existingSub) {
-                                // UPGRADE: Update existing subscription
-                                console.log(`Upgrading existing subscription ${existingSub.id} for user ${updatedOrder.userId}`);
+                                // UPGRADE/REPLACE: Update existing subscription
+                                console.log(`Upgrading existing subscription ${existingSub.id} for user ${existingOrder.userId}`);
                                 await prisma.subscription.update({
                                     where: { id: existingSub.id },
                                     data: {
                                         tierId: tier.id,
-                                        categoryId: tier.categoryId,
-                                        themeId: updatedOrder.themeId, // Carry over theme from order
-                                        siteUrl: updatedOrder.siteUrl, // Update URL
+                                        // Removed categoryId
+                                        themeId: existingOrder.themeId,
+                                        siteUrl: existingOrder.siteUrl, // Update URL
                                         status: 'ACTIVE',
                                         period: subPeriod,
                                         endDate: newEndDate,
@@ -105,14 +123,14 @@ export async function POST(req) {
                                 });
                             } else {
                                 // NEW: Create new subscription
-                                console.log(`Creating NEW subscription for user ${updatedOrder.userId}`);
+                                console.log(`Creating NEW subscription for user ${existingOrder.userId}`);
                                 await prisma.subscription.create({
                                     data: {
-                                        userId: updatedOrder.userId,
+                                        userId: existingOrder.userId,
                                         tierId: tier.id,
-                                        categoryId: tier.categoryId,
-                                        themeId: updatedOrder.themeId,
-                                        siteUrl: updatedOrder.siteUrl, // Set URL
+                                        // Removed categoryId
+                                        themeId: existingOrder.themeId,
+                                        siteUrl: existingOrder.siteUrl, // Set URL
                                         status: 'ACTIVE',
                                         period: subPeriod,
                                         endDate: newEndDate,
@@ -121,13 +139,11 @@ export async function POST(req) {
                                 });
                             }
                         } else {
-                            console.error('Tier not found for order:', updatedOrder.id);
+                            console.error('Tier not found for order:', existingOrder.id);
                         }
 
                     } else {
                         console.error('CRITICAL: Order NOT FOUND for token:', token);
-                        // Fallback to conversationId if token match failed? 
-                        // But if we saved token, it should work.
                     }
                 } catch (dbError) {
                     console.error('DATABASE ERROR:', dbError);

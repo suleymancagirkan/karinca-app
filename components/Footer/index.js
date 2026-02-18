@@ -52,6 +52,7 @@ export default function Footer() {
             { name: 'Privacy Policy', href: '/privacy' },
             { name: 'Terms of Service', href: '/terms' },
             { name: 'Cookie Policy', href: '/cookies' },
+            { name: 'Check Licence', href: '/check-licence' },
         ]
     };
 

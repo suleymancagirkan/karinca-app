@@ -26,19 +26,23 @@ export async function POST(req) {
         }
 
         const body = await req.json();
-        const { tier, method, billingAddress, siteUrl } = body; // Price ignored from body for security
+        const { tier, method, billingAddress, siteUrl } = body;
 
         // 1. Fetch Request Tier from DB to get authoritative price
         const targetTier = await prisma.tier.findUnique({
-            where: { id: tier.id },
-            include: { category: true }
+            where: { id: tier.id }
         });
 
         if (!targetTier) {
             return Response.json({ status: 'failure', errorMessage: 'Plan not found' }, { status: 404 });
         }
 
-        const targetPrice = method === 'Monthly' ? targetTier.priceMonthly : targetTier.priceYearly;
+        let targetPrice;
+        if (method === 'Monthly') targetPrice = targetTier.priceMonthly;
+        else if (method === 'Yearly') targetPrice = targetTier.priceYearly;
+        else if (method === 'Lifetime') targetPrice = targetTier.priceLifetime;
+        else targetPrice = targetTier.priceMonthly; // Default
+
         let finalPrice = targetPrice;
 
         // Check for URL uniqueness if provided
@@ -50,61 +54,69 @@ export async function POST(req) {
                 }
             });
 
-            if (existingSubWithUrl) {
+            if (existingSubWithUrl && existingSubWithUrl.userId !== userRecord.id) {
                 return Response.json({ status: 'failure', errorMessage: 'This URL is already in use by another active subscription.' }, { status: 400 });
             }
         }
 
-        // 2. Check for existing Active Subscription in the same Category
+        // 2. Check for existing Active Subscription (Account Level)
         const existingSub = await prisma.subscription.findFirst({
             where: {
                 userId: userRecord.id,
                 status: 'ACTIVE',
-                endDate: { gt: new Date() },
-                tier: { categoryId: targetTier.categoryId }
+                // Removed categoryId check
             },
             include: { tier: true }
         });
 
+        // Only apply upgrade/downgrade logic if we are NOT buying a distinct Lifetime deal or if logic allows replacing.
+        // For simplicity, if user has an active sub, we treat this as a potential upgrade/switch.
+
         if (existingSub) {
-            // A. Block re-purchasing same plan
-            if (existingSub.tierId === targetTier.id) {
+            // If buying Lifetime, we generally just upgrade them and cancel old subscription logic effectively by replacing it.
+            // But let's keep it simple: If upgrading checks:
+
+            // If same tier and same period, block
+            if (existingSub.tierId === targetTier.id && existingSub.period === method) {
                 return Response.json({ status: 'failure', errorMessage: 'You already have this plan active.' }, { status: 400 });
             }
 
+            // If Lifetime is involved, special handling might be needed, but sticking to value-based logic:
+
             // B. Block Downgrade (Compare checks base monthly value)
-            if (existingSub.tier.priceMonthly >= targetTier.priceMonthly) {
-                return Response.json({ status: 'failure', errorMessage: 'Downgrading is not supported on this plan. Please contact support or wait for your current subscription to expire.' }, { status: 400 });
+            // We use monthly price as a proxy for tier value
+            if (existingSub.tier.priceMonthly > targetTier.priceMonthly) {
+                return Response.json({ status: 'failure', errorMessage: 'Downgrading is not supported automatically. Please wait for current subscription to expire.' }, { status: 400 });
             }
 
             // C. Upgrade Calculation (Proration)
-            const now = new Date();
-            const endDate = new Date(existingSub.endDate);
-            const msPerDay = 1000 * 60 * 60 * 24;
+            // Only prorate if existing sub is NOT Lifetime (Lifetime has no end date usually, or far future)
+            if (existingSub.period !== 'Lifetime') {
+                const now = new Date();
+                const endDate = existingSub.endDate ? new Date(existingSub.endDate) : new Date();
+                const msPerDay = 1000 * 60 * 60 * 24;
 
-            // Calculate remaining value
-            const remainingTimeMs = endDate.getTime() - now.getTime();
-            const remainingDays = Math.max(0, Math.ceil(remainingTimeMs / msPerDay));
+                // Calculate remaining value
+                const remainingTimeMs = endDate.getTime() - now.getTime();
+                const remainingDays = Math.max(0, Math.ceil(remainingTimeMs / msPerDay));
 
-            // Determine old daily rate based on what they likely paid (Current DB price as proxy)
-            const oldPrice = existingSub.period === 'Monthly' ? existingSub.tier.priceMonthly : existingSub.tier.priceYearly;
-            const oldPeriodDays = existingSub.period === 'Monthly' ? 30 : 365;
-            const dailyRate = oldPrice / oldPeriodDays;
+                // Determine old daily rate
+                const oldPrice = existingSub.period === 'Monthly' ? existingSub.tier.priceMonthly : existingSub.tier.priceYearly;
+                const oldPeriodDays = existingSub.period === 'Monthly' ? 30 : 365;
+                const dailyRate = oldPrice / oldPeriodDays;
 
-            const unusedValue = dailyRate * remainingDays;
+                const unusedValue = dailyRate * remainingDays;
 
-            // Discount the unused value from the new price
-            finalPrice = Math.max(0, targetPrice - unusedValue);
+                // Discount the unused value from the new price
+                finalPrice = Math.max(0, targetPrice - unusedValue);
 
-            console.log(`Upgrade Detected: Old Tier ${existingSub.tier.name} -> New Tier ${targetTier.name}. Discount: ${unusedValue.toFixed(2)}, Final: ${finalPrice.toFixed(2)}`);
+                console.log(`Upgrade Detected: Old Tier ${existingSub.tier.name} -> New Tier ${targetTier.name}. Discount: ${unusedValue.toFixed(2)}, Final: ${finalPrice.toFixed(2)}`);
+            }
         }
 
         const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
         const conversationId = `TRX-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
         const paidPrice = parseFloat(finalPrice).toFixed(2);
-
-        // Extract theme info (if available)
-        const themeInfo = tier.theme || null;
 
         // 3. Create Pending Order
         const newOrder = await prisma.order.create({
@@ -112,10 +124,7 @@ export async function POST(req) {
                 userId: userRecord.id,
                 tierId: targetTier.id,
                 tierName: targetTier.name,
-                categoryId: targetTier.categoryId,
-                categoryName: targetTier.category?.name,
-                themeId: themeInfo?.id || null,
-                themeName: themeInfo?.name || null,
+                // Removed categoryId and categoryName
                 price: parseFloat(paidPrice),
                 currency: 'TRY',
                 status: 'PENDING',
@@ -126,8 +135,9 @@ export async function POST(req) {
         });
 
         const fullName = billingAddress?.name || userRecord.fullname || 'Guest User';
-        const [name, ...surnameParts] = fullName.split(' ');
-        const surname = surnameParts.join(' ') || 'User';
+        const nameParts = fullName.trim().split(' ');
+        const name = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : nameParts[0];
+        const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'User';
 
         const requestData = {
             locale: Iyzipay.LOCALE.TR,

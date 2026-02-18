@@ -20,7 +20,6 @@ export async function GET() {
             },
             include: {
                 tier: true,
-                category: true,
                 theme: true
             }
         });

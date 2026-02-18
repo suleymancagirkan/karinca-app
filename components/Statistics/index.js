@@ -14,10 +14,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const stats = [
-    { label: "Successful Projects", value: "120", suffix: "+" },
-    { label: "Years of Experience", value: "10", suffix: "+" },
-    { label: "Revenue Generated", value: "50", suffix: "M" },
-    { label: "Client Satisfaction", value: "99", suffix: "%" },
+    { label: "Successful Projects", value: "50", suffix: "+" },
+    { label: "Years of Experience", value: "5", suffix: "+" },
+    { label: "Revenue Generated", value: "30", suffix: "K" },
+    { label: "Client Satisfaction", value: "90", suffix: "%" },
 ];
 
 export default function Statistics() {

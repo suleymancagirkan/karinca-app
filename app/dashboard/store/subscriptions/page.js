@@ -191,11 +191,6 @@ export default function SubscriptionsPage() {
                                     <div className="flex items-center justify-between mb-1">
                                         <h3 className="font-unbounded font-bold text-lg text-neutral-900 dark:text-white truncate max-w-[70%]">
                                             {sub.tier?.name || 'Unknown Tier'}
-                                            {sub.category?.name && (
-                                                <span className="ml-2 pl-2 text-sm font-medium text-neutral-500">
-                                                    • {sub.category.name}
-                                                </span>
-                                            )}
                                         </h3>
                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-unbounded tracking-wide ${getStatusColor(sub.status)}`}>
                                             {sub.status}

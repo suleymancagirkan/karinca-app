@@ -6,10 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 export async function GET() {
     try {
         const tiers = await prisma.tier.findMany({
-            orderBy: { createdAt: 'desc' },
-            include: {
-                category: true // Include category data
-            }
+            orderBy: { createdAt: 'desc' }
         });
         return NextResponse.json(tiers);
     } catch (error) {
@@ -25,7 +22,7 @@ export async function POST(request) {
         }
 
         const body = await request.json();
-        const { name, description, priceMonthly, priceYearly, categoryId, features } = body;
+        const { name, description, priceMonthly, priceYearly, priceLifetime, features, isPopular } = body;
 
         const tier = await prisma.tier.create({
             data: {
@@ -33,11 +30,9 @@ export async function POST(request) {
                 description,
                 priceMonthly: parseFloat(priceMonthly),
                 priceYearly: parseFloat(priceYearly),
-                categoryId,
-                features
-            },
-            include: {
-                category: true
+                priceLifetime: priceLifetime ? parseFloat(priceLifetime) : null,
+                features,
+                isPopular: !!isPopular
             }
         });
 
@@ -56,7 +51,7 @@ export async function PUT(request) {
         }
 
         const body = await request.json();
-        const { id, name, description, priceMonthly, priceYearly, categoryId, features } = body;
+        const { id, name, description, priceMonthly, priceYearly, priceLifetime, features, isPopular } = body;
 
         const tier = await prisma.tier.update({
             where: { id },
@@ -65,11 +60,9 @@ export async function PUT(request) {
                 description,
                 priceMonthly: parseFloat(priceMonthly),
                 priceYearly: parseFloat(priceYearly),
-                categoryId,
-                features
-            },
-            include: {
-                category: true
+                priceLifetime: priceLifetime ? parseFloat(priceLifetime) : null,
+                features,
+                isPopular: !!isPopular
             }
         });
 

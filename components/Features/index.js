@@ -20,6 +20,7 @@ import {
     TbBrandGoogleAnalytics,
     TbArrowUpRight
 } from 'react-icons/tb';
+import { useRouter } from 'next/navigation';
 
 const services = [
     {
@@ -53,6 +54,8 @@ const services = [
 ];
 
 export default function Features() {
+    const router = useRouter();
+
     return (
         <section className="py-24 md:py-32 bg-white dark:bg-[#050505] text-neutral-900 dark:text-white relative overflow-hidden">
 
@@ -138,12 +141,13 @@ export default function Features() {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.4 }}
+                        onClick={() => router.push('/features')}
                         className="group relative p-8 md:p-12 rounded-[2rem] flex flex-col justify-center items-center text-center h-[300px] md:h-[400px] bg-neutral-50 dark:bg-[#0A0A0A] border-2 border-dashed border-neutral-300 dark:border-neutral-800 md:col-span-1 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors cursor-pointer"
                     >
                         <div className="w-16 h-16 rounded-full bg-neutral-200 dark:bg-neutral-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <TbArrowUpRight className="text-3xl text-neutral-500 dark:text-neutral-400" />
                         </div>
-                        <h3 className="font-unbounded font-bold text-xl mb-2">View All Services</h3>
+                        <h3 className="font-unbounded font-bold text-xl mb-2">View All Features</h3>
                         <p className="font-unbounded text-xs text-neutral-500">Explore our full capabilities</p>
                     </motion.div>
                 </div>
