@@ -31,7 +31,6 @@ export default function DashboardSidebar({ isOpen = false, onClose = () => { } }
             icon: <TbShoppingCartFilled className='text-xl ml-2' />,
             subItems: [
                 { name: 'Tiers', route: '/dashboard/store/tiers' },
-                { name: 'Categories', route: '/dashboard/store/categories' },
                 { name: 'Themes', route: '/dashboard/store/themes' },
                 { name: 'Coupons', route: '/dashboard/store/coupons' },
                 { name: 'Subscriptions', route: '/dashboard/store/subscriptions' },

@@ -42,12 +42,12 @@ export default function Footer() {
             { name: 'Blog', href: '/blogs' },
             { name: 'Contact', href: '/contact' },
         ],
-        resources: [
-            { name: 'Documentation', href: '/docs' },
-            { name: 'Help Center', href: '/help' },
-            { name: 'Community', href: '/community' },
-            { name: 'Status', href: '/status' },
-        ],
+        // resources: [
+        //     { name: 'Documentation', href: '/docs' },
+        //     { name: 'Help Center', href: '/help' },
+        //     { name: 'Community', href: '/community' },
+        //     { name: 'Status', href: '/status' },
+        // ],
         legal: [
             { name: 'Privacy Policy', href: '/privacy' },
             { name: 'Terms of Service', href: '/terms' },
@@ -153,7 +153,7 @@ export default function Footer() {
                             ))}
                         </ul>
                     </div>
-
+                    {/* 
                     <div>
                         <h4 className="font-bold text-neutral-900 dark:text-neutral-100 mb-6">Resources</h4>
                         <ul className="space-y-4">
@@ -165,7 +165,7 @@ export default function Footer() {
                                 </li>
                             ))}
                         </ul>
-                    </div>
+                    </div> */}
 
                     <div>
                         <h4 className="font-bold text-neutral-900 dark:text-neutral-100 mb-6">Legal</h4>

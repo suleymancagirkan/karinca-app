@@ -4,7 +4,6 @@ import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-// GET: Get specific ticket details (User only sees their own)
 export async function GET(req, { params }) {
     try {
         const session = await getServerSession(authOptions);

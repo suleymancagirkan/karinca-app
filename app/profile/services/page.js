@@ -59,6 +59,19 @@ export default function ServicesPage() {
         return <TbBox />;
     };
 
+    const getSubscriptionProgress = (service) => {
+        const start = new Date(service.startDate);
+        const end = new Date(service.endDate);
+        const now = new Date();
+        const total = end - start;
+        const elapsed = now - start;
+        const percent = Math.min(100, Math.max(0, (elapsed / total) * 100));
+        const daysTotal = Math.round(total / (1000 * 60 * 60 * 24));
+        const daysLeft = Math.max(0, Math.round((end - now) / (1000 * 60 * 60 * 24)));
+        const daysElapsed = Math.max(0, Math.round((now - start) / (1000 * 60 * 60 * 24)));
+        return { percent, daysLeft, daysElapsed, daysTotal };
+    };
+
     const handleSetupSave = async (data) => {
         try {
             const res = await fetch('/api/v1/users/subscriptions/setup', {
@@ -147,11 +160,11 @@ export default function ServicesPage() {
                                     <div className="flex-1 min-w-0 flex flex-col gap-1 w-full text-center md:text-left">
                                         <div className="flex items-center justify-center md:justify-start gap-3">
                                             <h3 className="font-unbounded font-bold text-lg leading-tight truncate text-neutral-900 dark:text-white">
-                                                {service.category?.name || 'Service'}
+                                                {service.tier?.name || 'Service'}
                                             </h3>
-                                            <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-[10px] font-unbounded font-bold uppercase text-neutral-600 dark:text-neutral-400 shrink-0">
-                                                {service.tier?.name}
-                                            </span>
+                                            {/* <span className="px-2 py-0.5 rounded-full bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 text-[10px] font-unbounded font-bold uppercase text-neutral-600 dark:text-neutral-400 shrink-0">
+                                                {service.category?.name}
+                                            </span> */}
                                         </div>
 
                                         {/* Meta Info */}
@@ -170,6 +183,44 @@ export default function ServicesPage() {
                                                 </span>
                                             )}
                                         </div>
+
+                                        {/* Progress Bar */}
+                                        {(() => {
+                                            const isLifetime = service.period === 'Lifetime';
+                                            if (isLifetime) {
+                                                return (
+                                                    <div className="mt-3 w-full">
+                                                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
+                                                            <span>Lifetime Access</span>
+                                                            <span className="text-green-500">∞ Never Expires</span>
+                                                        </div>
+                                                        <div className="w-full h-1 rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
+                                                            <div className="h-full rounded-full bg-gradient-to-r from-green-400 to-emerald-500" style={{ width: '100%' }} />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            const { percent, daysLeft, daysElapsed, daysTotal } = getSubscriptionProgress(service);
+                                            const isNearEnd = daysLeft <= 7;
+                                            return (
+                                                <div className="mt-3 w-full">
+                                                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1.5">
+                                                        <span>{daysElapsed}d elapsed</span>
+                                                        <span className={isNearEnd ? 'text-red-500' : ''}>
+                                                            {daysLeft}d remaining
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full h-1 rounded-full bg-neutral-100 dark:bg-neutral-800 overflow-hidden">
+                                                        <motion.div
+                                                            className={`h-full rounded-full ${isNearEnd ? 'bg-gradient-to-r from-red-400 to-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`}
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${percent}%` }}
+                                                            transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Actions */}

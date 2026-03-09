@@ -21,7 +21,7 @@ function PricingContent() {
     const [billingAddress, setBillingAddress] = useState(null);
 
     const [paymentStatus, setPaymentStatus] = useState(null);
-    const [statusMessage, setStatusMessage] = '';
+    const [statusMessage, setStatusMessage] = useState('');
 
     const [tiers, setTiers] = useState([]);
     const [userSubscriptions, setUserSubscriptions] = useState([]);
@@ -62,15 +62,14 @@ function PricingContent() {
                         setUserSubscriptions(subsData);
                     }
 
-                    // Map DB tiers to UI structure
-                    const mappedTiers = tiersData.map(tier => ({
+                    const mappedTiers = tiersData.reverse().map(tier => ({
                         id: tier.id,
                         title: tier.name,
                         description: tier.description || 'No description available',
                         prices: [
                             { id: 'Monthly', amount: tier.priceMonthly },
                             { id: 'Yearly', amount: tier.priceYearly },
-                            { id: 'Lifetime', amount: tier.priceLifetime || null }, // Handle null lifetime price if needed, or filter out
+                            { id: 'Lifetime', amount: tier.priceLifetime || null },
                         ],
                         features: (tier.features || []).map(f => ({ text: f, isGood: true })),
                         isPopular: tier.isPopular
@@ -196,10 +195,10 @@ function PricingContent() {
                 {/* Pricing Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
                     {isLoading ? (
-                        <div className="col-span-full text-center py-20 text-neutral-500">Loading pricing plans...</div>
+                        <div className="col-span-full  text-center py-20 text-neutral-500">Loading pricing plans...</div>
                     ) : (
                         <AnimatePresence>
-                            {tiers.map((item, index) => {
+                            {tiers.sort().map((item, index) => {
                                 // Find if user has subscription
                                 const activeSub = userSubscriptions.find(sub => sub.tier.id === item.id);
                                 const isCurrentPlan = !!activeSub;
